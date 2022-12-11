@@ -14,19 +14,32 @@ namespace SiKoperasi.AppService.Services.Master
         {
         }
 
+        public async Task CreateSubDistrictAsync(SubDistrictCreateDto payload)
+        {
+            await BaseCreateAsync(payload);
+        }
+
         public SubDistrict GetSubDistrictModel(string id)
         {
-            throw new NotImplementedException();
+            return GetModelById(id);
         }
 
         protected override SubDistrict CreateNewModel(SubDistrictCreateDto payload)
         {
-            throw new NotImplementedException();
+            SubDistrict subDistrict = new()
+            {
+                Name = payload.Name,
+                Code = payload.Code,
+                PostalCode = payload.PostalCode,
+                DistrictId = payload.DistrictId,
+            };
+
+            return subDistrict;
         }
 
         protected override DbSet<SubDistrict> GetAppDbSet()
         {
-            throw new NotImplementedException();
+            return dbContext.SubDistricts;
         }
 
         protected override void SetModelValue(SubDistrict model, SubDistrictEditDto payload)
@@ -36,12 +49,12 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override IQueryable<SubDistrict> SetQueryable()
         {
-            throw new NotImplementedException();
+            return dbContext.SubDistricts;
         }
 
         protected override void ValidateCreate(SubDistrict model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateDelete(SubDistrict model)

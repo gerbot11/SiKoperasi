@@ -15,4 +15,8 @@
     <ProjectReference Include="..\SiKoperasi.DataAccess\SiKoperasi.DataAccess.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Common\" />
+  </ItemGroup>
+
 </Project>

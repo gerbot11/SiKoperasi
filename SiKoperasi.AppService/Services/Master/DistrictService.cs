@@ -14,50 +14,57 @@ namespace SiKoperasi.AppService.Services.Master
         {
         }
 
-        public Task CreateDistrictAsync(DistrictCreateDto dto)
+        public async Task CreateDistrictAsync(DistrictCreateDto dto)
         {
-            throw new NotImplementedException();
+            await BaseCreateAsync(dto);
         }
 
         public District GetDistrictModel(string id)
         {
-            throw new NotImplementedException();
+            return GetModelById(id);
         }
 
         #region Abstract Implementation
         protected override District CreateNewModel(DistrictCreateDto payload)
         {
-            throw new NotImplementedException();
+            District district = new()
+            {
+                Name = payload.Name,
+                Code = payload.Code,
+                CityId = payload.CityId,
+            };
+
+            return district;
         }
 
         protected override DbSet<District> GetAppDbSet()
         {
-            throw new NotImplementedException();
+            return dbContext.Districts;
         }
 
         protected override void SetModelValue(District model, DistrictEditDto payload)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override IQueryable<District> SetQueryable()
         {
-            throw new NotImplementedException();
+            return dbContext.Districts;
         }
 
         protected override void ValidateCreate(District model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateDelete(District model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateEdit(District model)
         {
-            throw new NotImplementedException();
+            return;
         }
         #endregion
     }

@@ -19,6 +19,7 @@ namespace SiKoperasi.DataAccess.Dao
         public virtual DbSet<Province> Provinces { get; set; }
         public virtual DbSet<District> Districts { get; set; }
         public virtual DbSet<SubDistrict> SubDistricts { get; set; }
+        public virtual DbSet<MasterSequence> MasterSequences { get; set; }
 
         //Member
         public virtual DbSet<Member> Members { get; set; }
@@ -38,6 +39,12 @@ namespace SiKoperasi.DataAccess.Dao
             return base.SaveChangesAsync(acceptAllChangesOnSuccess: true, cancellationToken: cancellationToken);
         }
 
+        public override int SaveChanges()
+        {
+            Audit();
+            return base.SaveChanges();
+        }
+
         private void Audit()
         {
             IEnumerable<EntityEntry> entityEntry = ChangeTracker.Entries().Where(a => a.State == EntityState.Added || a.State == EntityState.Modified);
@@ -47,14 +54,14 @@ namespace SiKoperasi.DataAccess.Dao
                 if (item.State == EntityState.Added)
                 {
                     baseModel.UsrCrt = "Test Audit Crt";
-                    baseModel.DtmCrt = DateTime.UtcNow;
+                    baseModel.DtmCrt = DateTime.Now;
                     baseModel.UsrUpd = "Test Audit Crt";
-                    baseModel.DtmUpd = DateTime.UtcNow;
+                    baseModel.DtmUpd = DateTime.Now;
                 }
                 else if(item.State == EntityState.Modified)
                 {
                     baseModel.UsrUpd = "Test Audit Upd";
-                    baseModel.DtmUpd = DateTime.UtcNow;
+                    baseModel.DtmUpd = DateTime.Now;
                 }
             }
         }

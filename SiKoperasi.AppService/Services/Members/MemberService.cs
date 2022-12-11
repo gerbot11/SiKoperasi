@@ -4,6 +4,7 @@ using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Member;
 using SiKoperasi.Core.Common;
 using SiKoperasi.DataAccess.Dao;
+using SiKoperasi.DataAccess.Models.MasterData;
 using SiKoperasi.DataAccess.Models.Members;
 
 namespace SiKoperasi.AppService.Services.Members
@@ -14,13 +15,16 @@ namespace SiKoperasi.AppService.Services.Members
         private readonly IProvinceService provinceService;
         private readonly IDistrictService districtService;
         private readonly ISubDistrictService subDistrictService;
+        private readonly IMasterSequenceService masterSequenceService;
         public MemberService(AppDbContext dbContext, IMapper mapper, 
-            ICityService cityService, IProvinceService provinceService, IDistrictService districtService, ISubDistrictService subDistrictService) : base(dbContext, mapper)
+            ICityService cityService, IProvinceService provinceService, IDistrictService districtService, ISubDistrictService subDistrictService, IMasterSequenceService masterSequenceService) 
+            : base(dbContext, mapper)
         {
             this.cityService = cityService;
             this.provinceService = provinceService;
             this.districtService = districtService;
             this.subDistrictService = subDistrictService;
+            this.masterSequenceService = masterSequenceService;
         }
 
         public async Task CreateMemberAsync(MemberCreateDto payload)
@@ -40,7 +44,20 @@ namespace SiKoperasi.AppService.Services.Members
                 BirthPlace = payload.BirthPlace,
                 BirthDate = payload.BirthDate,
                 NpwpNo = payload.NpwpNo,
+                MemberNo = masterSequenceService.GenerateNo(MasterSequence.MEMBER_CODE),
+                PhoneNumber = payload.PhoneNumber,
+                Addresses = new List<Address>()
             };
+
+            Job job = new()
+            {
+                JobName = payload.Job.JobName,
+                JobDescription = payload.Job.JobDescription,
+                JobPosition = payload.Job.JobPosition,
+                StartDate = payload.Job.StartDate
+            };
+
+            member.Job = job;
 
             foreach (AddressCreateDto item in payload.Address)
             {
@@ -79,7 +96,7 @@ namespace SiKoperasi.AppService.Services.Members
 
         protected override void ValidateCreate(Member model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateDelete(Member model)

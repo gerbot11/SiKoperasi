@@ -31,7 +31,14 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override City CreateNewModel(CityCreateDto payload)
         {
-            throw new NotImplementedException();
+            City city = new()
+            {
+                Name = payload.Name,
+                Code = payload.Code,
+                ProvinceId = payload.ProvinceId
+            };
+
+            return city;
         }
 
         protected override DbSet<City> GetAppDbSet()
@@ -41,7 +48,7 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override void SetModelValue(City model, CityEditDto payload)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override IQueryable<City> SetQueryable()
@@ -51,17 +58,17 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override void ValidateCreate(City model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateDelete(City model)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void ValidateEdit(City model)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }
