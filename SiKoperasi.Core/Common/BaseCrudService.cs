@@ -36,6 +36,16 @@ namespace SiKoperasi.Core.Common
             return result;
         }
 
+        protected virtual TModel GetModelById(string id)
+        {
+            TModel? result = GetAppDbSet().Find(id);
+
+            if (result is null)
+                throw new Exception("Data Not Found!");
+
+            return result;
+        }
+
         protected virtual async Task<PagingModel<TModel>> GetPagingDataAsync(IQueryParam queryParam)
         {
             return await PagingModel<TModel>.CreateAsync(SetQueryable(), queryParam);

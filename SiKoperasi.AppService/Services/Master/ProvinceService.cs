@@ -23,8 +23,13 @@ namespace SiKoperasi.AppService.Services.Master
 
         public async Task<ProvinceDto> GetProvinceAsync(string id)
         {
-            var data = await GetByIdAsync(id);
+            ProvinceDto data = await GetByIdAsync(id);
             return data;
+        }
+
+        public Province GetProvinceModel(string id)
+        {
+            return GetModelById(id);
         }
 
         public async Task CreateProvinceAsync(ProvinceCreateDto payload)

@@ -11,6 +11,7 @@ namespace SiKoperasi.AppService.Contract
         Task DeleteProvinceAsync(string id);
         Task EditProvinceAsync(ProvinceEditDto payload);
         Task<ProvinceDto> GetProvinceAsync(string id);
+        Province GetProvinceModel(string id);
         Task<PagingModel<Province>> GetProvincePagingAsync(QueryParamDto dto);
     }
 }

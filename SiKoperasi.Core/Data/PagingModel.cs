@@ -63,7 +63,6 @@ namespace SiKoperasi.Core.Data
             if (string.IsNullOrEmpty(queryParam.OrderBy))
                 return source;
 
-            PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
             PropertyInfo? property = typeof(T).GetProperty(queryParam.OrderBy);
             if (property == null)
             {
