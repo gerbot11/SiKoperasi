@@ -84,9 +84,9 @@ namespace SiKoperasi.AppService.Services.Master
             
         }
 
-        protected override void ValidateEdit(Province model, string id)
+        protected override void ValidateEdit(Province model)
         {
-            if (dbContext.Provinces.Any(a => a.Code == model.Code && a.Id != id))
+            if (dbContext.Provinces.Any(a => a.Code == model.Code && a.Id != model.Id))
             {
                 throw new Exception("Province Already Exist!");
             }

@@ -53,7 +53,7 @@ namespace SiKoperasi.Core.Common
         {
             TModel modeledit = await GetModelByIdAsync(id);
             SetModelValue(modeledit, payload);
-            ValidateEdit(modeledit, id);
+            ValidateEdit(modeledit);
             dbContext.Update(modeledit);
             await dbContext.SaveChangesAsync();
         }
@@ -75,7 +75,7 @@ namespace SiKoperasi.Core.Common
         protected abstract DbSet<TModel> GetAppDbSet();
         protected abstract IQueryable<TModel> SetQueryable();
         protected abstract void ValidateDelete(TModel model);
-        protected abstract void ValidateEdit(TModel model, string id);
+        protected abstract void ValidateEdit(TModel model);
         protected abstract void ValidateCreate(TModel model);
         protected abstract void SetModelValue(TModel model, TPayloadEdit payload);
     }

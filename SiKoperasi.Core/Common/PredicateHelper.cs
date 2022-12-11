@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace SiKoperasi.Core.Common
 {
@@ -30,6 +31,15 @@ namespace SiKoperasi.Core.Common
             }
 
             return null;
+        }
+
+        public static Expression<Func<T, object>> SetPredicateExpression(string orderBy)
+        {
+            ParameterExpression param = Expression.Parameter(typeof(T));
+            Expression prop = Expression.Property(param, orderBy);
+            UnaryExpression objectProp = Expression.Convert(prop, typeof(object));
+
+            return Expression.Lambda<Func<T, object>>(objectProp, param);
         }
     }
 }

@@ -14,19 +14,31 @@ namespace SiKoperasi.AppService.Services.Members
         {
         }
 
-        public Task CreateMemberAsync(MemberCreateDto payload)
+        public async Task CreateMemberAsync(MemberCreateDto payload)
         {
-            throw new NotImplementedException();
+            await BaseCreateAsync(payload);
         }
 
         protected override Member CreateNewModel(MemberCreateDto payload)
         {
-            throw new NotImplementedException();
+            Member member = new()
+            {
+                Name = payload.Name,
+                IdNo = payload.IdNo,
+                IdType = payload.IdType,
+                Gender = payload.Gender,
+                BirthPlace = payload.BirthPlace,
+                BirthDate = payload.BirthDate,
+                NpwpNo = payload.NpwpNo
+            };
+
+            return member;
         }
 
+        #region Abstract Implementation
         protected override DbSet<Member> GetAppDbSet()
         {
-            throw new NotImplementedException();
+            return dbContext.Members;
         }
 
         protected override void SetModelValue(Member model, MemberEditDto payload)
@@ -36,7 +48,7 @@ namespace SiKoperasi.AppService.Services.Members
 
         protected override IQueryable<Member> SetQueryable()
         {
-            throw new NotImplementedException();
+            return dbContext.Members;
         }
 
         protected override void ValidateCreate(Member model)
@@ -49,9 +61,10 @@ namespace SiKoperasi.AppService.Services.Members
             throw new NotImplementedException();
         }
 
-        protected override void ValidateEdit(Member model, string id)
+        protected override void ValidateEdit(Member model)
         {
             throw new NotImplementedException();
         }
+        #endregion
     }
 }

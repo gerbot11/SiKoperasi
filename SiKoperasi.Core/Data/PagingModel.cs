@@ -64,19 +64,21 @@ namespace SiKoperasi.Core.Data
                 return source;
 
             PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            PropertyInfo? property = props.FirstOrDefault(a => a.Name == queryParam.OrderBy);
+            PropertyInfo? property = typeof(T).GetProperty(queryParam.OrderBy);
             if (property == null)
             {
                 throw new Exception("Invalid Field for Order!");
             }
 
+            var expresionOrder = PredicateHelper<T>.SetPredicateExpression(queryParam.OrderBy);
+
             if (queryParam.OrderBehavior == OrderBehaviour.Asc)
             {
-                return source.OrderBy(a => property.GetValue(a));
+                return source.OrderBy(expresionOrder);
             }
             else
             {
-                return source.OrderByDescending(a => property.GetValue(a));
+                return source.OrderByDescending(expresionOrder);
             }
         }
 
