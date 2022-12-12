@@ -1,82 +1,56 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Member;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
-using SiKoperasi.DataAccess.Models.MasterData;
 using SiKoperasi.DataAccess.Models.Members;
 
 namespace SiKoperasi.AppService.Services.Members
 {
     public class MemberService : BaseCrudService<Member, MemberCreateDto, MemberEditDto, MemberDto, AppDbContext>, IMemberService
     {
-        private readonly ICityService cityService;
-        private readonly IProvinceService provinceService;
-        private readonly IDistrictService districtService;
-        private readonly ISubDistrictService subDistrictService;
         private readonly IMasterSequenceService masterSequenceService;
-        public MemberService(AppDbContext dbContext, IMapper mapper, 
-            ICityService cityService, IProvinceService provinceService, IDistrictService districtService, ISubDistrictService subDistrictService, IMasterSequenceService masterSequenceService) 
+        public MemberService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService) 
             : base(dbContext, mapper)
         {
-            this.cityService = cityService;
-            this.provinceService = provinceService;
-            this.districtService = districtService;
-            this.subDistrictService = subDistrictService;
             this.masterSequenceService = masterSequenceService;
         }
 
-        public async Task CreateMemberAsync(MemberCreateDto payload)
+        public async Task<MemberDto> CreateMemberAsync(MemberCreateDto payload)
         {
-            await BaseCreateAsync(payload);
+            return await BaseCreateAsync(payload);
+        }
+
+        public async Task<MemberDto> GetMemberAsync(string id)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        public async Task<PagingModel<MemberDto>> GetMemberPagingAsync(QueryParamDto queryParam)
+        {
+            return await GetPagingDataDtoAsync(queryParam);
+        }
+
+        public async Task<MemberDto> EditMemberAsync(MemberEditDto payload)
+        {
+            return await BaseEditAsync(payload.Id, payload);
+        }
+
+        public async Task DeleteMember(string id)
+        {
+            await BaseDeleteAsync(id);
         }
 
         #region Abstract Implementation
         protected override Member CreateNewModel(MemberCreateDto payload)
         {
-            Member member = new()
-            {
-                Name = payload.Name,
-                IdNo = payload.IdNo,
-                IdType = payload.IdType,
-                Gender = payload.Gender,
-                BirthPlace = payload.BirthPlace,
-                BirthDate = payload.BirthDate,
-                NpwpNo = payload.NpwpNo,
-                MemberNo = masterSequenceService.GenerateNo(MasterSequence.MEMBER_CODE),
-                PhoneNumber = payload.PhoneNumber,
-                Addresses = new List<Address>()
-            };
-
-            Job job = new()
-            {
-                JobName = payload.Job.JobName,
-                JobDescription = payload.Job.JobDescription,
-                JobPosition = payload.Job.JobPosition,
-                StartDate = payload.Job.StartDate
-            };
-
-            member.Job = job;
-
-            foreach (AddressCreateDto item in payload.Address)
-            {
-                Address address = new()
-                {
-                    AddressType = item.AddressType,
-                    Description = item.Description,
-                    Rt = item.Rt,
-                    Rw = item.Rw,
-                    Province = provinceService.GetProvinceModel(item.ProvinceId),
-                    City = cityService.GetCity(item.CityId),
-                    District = districtService.GetDistrictModel(item.DistrictId),
-                    SubDistrict = subDistrictService.GetSubDistrictModel(item.SubDistrictId),
-                };
-
-                member.Addresses.Add(address);
-            }
-
-            return member;
+            Member newMember = mapper.Map<Member>(payload);
+            newMember.MemberNo = masterSequenceService.GenerateNo(Member.MEMBER_SEQ_CODE);
+            newMember.IsActive = true;
+            return newMember;
         }
 
         protected override DbSet<Member> GetAppDbSet()
@@ -84,9 +58,22 @@ namespace SiKoperasi.AppService.Services.Members
             return dbContext.Members;
         }
 
+        protected override string SetDefaultOrderField()
+        {
+            return nameof(Member.Name);
+        }
+
         protected override void SetModelValue(Member model, MemberEditDto payload)
         {
-            throw new NotImplementedException();
+            model.Name = payload.Name;
+            model.IdNo = payload.IdNo;
+            model.IsActive = payload.IsActive;
+            model.IdType = payload.IdType;
+            model.Gender = payload.Gender;
+            model.BirthDate = payload.BirthDate;
+            model.BirthPlace = payload.BirthPlace;
+            model.PhoneNumber = payload.PhoneNumber;
+            model.NpwpNo = payload.NpwpNo;
         }
 
         protected override IQueryable<Member> SetQueryable()
@@ -96,17 +83,23 @@ namespace SiKoperasi.AppService.Services.Members
 
         protected override void ValidateCreate(Member model)
         {
-            return;
+            if (dbContext.Members.Any(a => a.IdNo == model.IdNo))
+            {
+                throw new Exception($"Duplicate Member with ID No '{model.IdNo}'");
+            }
         }
 
         protected override void ValidateDelete(Member model)
         {
-            throw new NotImplementedException();
+            throw new Exception("Ga Bisa Hapus Member Bang, Banyak Relasi! (set inactive aja)");
         }
 
         protected override void ValidateEdit(Member model)
         {
-            throw new NotImplementedException();
+            if (dbContext.Members.Any(a => a.IdNo == model.IdNo))
+            {
+                throw new Exception($"Duplicate Member with ID No '{model.IdNo}'");
+            }
         }
         #endregion
     }

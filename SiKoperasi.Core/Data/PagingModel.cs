@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Enums;
 using System.Linq.Expressions;
@@ -32,6 +33,16 @@ namespace SiKoperasi.Core.Data
             List<T> items = await sourceFinal.Skip((queryParam.PageIndex - 1) * queryParam.PageSize).Take(queryParam.PageSize).ToListAsync();
 
             return new PagingModel<T>(items, count, queryParam.PageIndex, queryParam.PageSize);
+        }
+
+        public static async Task<PagingModel<TResult>> CreateDtoPagingAsync<TResult>(IQueryable<T> source, IQueryParam queryParam, Func<T, TResult> dtoMapper) 
+            where TResult : class
+        {
+            IQueryable<T> sourceFinal = SetSearchQueryable(SetSortingQueryable(source, queryParam), queryParam);
+            int count = await sourceFinal.CountAsync();
+            List<T> items = await sourceFinal.Skip((queryParam.PageIndex - 1) * queryParam.PageSize).Take(queryParam.PageSize).ToListAsync();
+
+            return new PagingModel<TResult>(items.Select(dtoMapper).ToList(), count, queryParam.PageIndex, queryParam.PageSize);
         }
 
         private static IQueryable<T> SetSearchQueryable(IQueryable<T> source, IQueryParam queryParam)

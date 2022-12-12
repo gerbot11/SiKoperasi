@@ -96,6 +96,11 @@ namespace SiKoperasi.AppService.Services.Master
                 throw new Exception("Province Already Exist!");
             }
         }
+
+        protected override string SetDefaultOrderField()
+        {
+            return nameof(Province.Name);
+        }
         #endregion
     }
 }

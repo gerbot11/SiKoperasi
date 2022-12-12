@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.District;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.MasterData;
 
@@ -19,27 +21,45 @@ namespace SiKoperasi.AppService.Services.Master
             await BaseCreateAsync(dto);
         }
 
+        public async Task EditDistrictAsync(DistrictEditDto dto)
+        {
+            await BaseEditAsync(dto.Id, dto);
+        }
+
+        public async Task DeleteDistrictAsync(string id)
+        {
+            await BaseDeleteAsync(id);
+        }
+
         public District GetDistrictModel(string id)
         {
             return GetModelById(id);
         }
 
+        public async Task<DistrictDto> GetDistrictAsync(string id)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        public async Task<PagingModel<DistrictDto>> GetDistrictPagingAsync(QueryParamDto queryParam)
+        {
+            return await GetPagingDataDtoAsync(queryParam);
+        }
+
         #region Abstract Implementation
         protected override District CreateNewModel(DistrictCreateDto payload)
         {
-            District district = new()
-            {
-                Name = payload.Name,
-                Code = payload.Code,
-                CityId = payload.CityId,
-            };
-
-            return district;
+            return mapper.Map<District>(payload);
         }
 
         protected override DbSet<District> GetAppDbSet()
         {
             return dbContext.Districts;
+        }
+
+        protected override string SetDefaultOrderField()
+        {
+            return nameof(District.Name);
         }
 
         protected override void SetModelValue(District model, DistrictEditDto payload)

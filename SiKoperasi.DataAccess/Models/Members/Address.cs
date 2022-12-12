@@ -10,11 +10,15 @@ namespace SiKoperasi.DataAccess.Models.Members
         public string Description { get; set; }
         public string Rt { get; set; }
         public string Rw { get; set; }
-        public District District { get; set; }
-        public SubDistrict SubDistrict { get; set; }
-        public City City { get; set; }
-        public Province Province { get; set; }
+        public string ProvinceId { get; set; }
+        public string CityId { get; set; }
+        public string DistrictId { get; set; }
+        public string SubDistrictId { get; set; }
 
+        public virtual District District { get; set; }
+        public virtual SubDistrict SubDistrict { get; set; }
+        public virtual City City { get; set; }
+        public virtual Province Province { get; set; }
         public virtual Member Member { get; set; }
     }
 }

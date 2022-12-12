@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using SiKoperasi.Web.Common;
 using SiKoperasi.Web.Middleware;
 
@@ -20,8 +21,14 @@ var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+    else
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(op => op.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
+    }
 
-    app.UseMiddleware<ErrorHandlingMiddleware>();
+    //app.UseMiddleware<ErrorHandlingMiddleware>();
+    app.UseExceptionHandler("/error");
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();

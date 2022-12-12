@@ -8,15 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SiKoperasi.Core\SiKoperasi.Core.csproj" />
     <ProjectReference Include="..\SiKoperasi.DataAccess\SiKoperasi.DataAccess.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\Common\" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.City;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.MasterData;
 
@@ -19,9 +21,14 @@ namespace SiKoperasi.AppService.Services.Master
             await BaseCreateAsync(payload);
         }
 
-        public async Task<City> GetCityAsync(string id)
+        public async Task<CityDto> GetCityAsync(string id)
         {
-            return await GetModelByIdAsync(id);
+            return await GetByIdAsync(id);
+        }
+
+        public async Task<PagingModel<CityDto>> GetCityPagingAsync(QueryParamDto queryParam)
+        {
+            return await GetPagingDataDtoAsync(queryParam);
         }
 
         public City GetCity(string id)
@@ -58,7 +65,10 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override void ValidateCreate(City model)
         {
-            return;
+            if (!dbContext.Provinces.Any(a => a.Id == model.ProvinceId))
+            {
+                throw new Exception("Province is Not Exist");
+            }
         }
 
         protected override void ValidateDelete(City model)
@@ -69,6 +79,11 @@ namespace SiKoperasi.AppService.Services.Master
         protected override void ValidateEdit(City model)
         {
             return;
+        }
+
+        protected override string SetDefaultOrderField()
+        {
+            return nameof(City.Name);
         }
     }
 }

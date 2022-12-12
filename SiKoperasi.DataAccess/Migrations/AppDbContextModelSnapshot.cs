@@ -114,6 +114,10 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Property<int?>("NextDueNum")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UsrCrt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -126,9 +130,56 @@ namespace SiKoperasi.DataAccess.Migrations
 
                     b.HasIndex("LoanSchemeId");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("MemberId")
+                        .IsUnique();
 
                     b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanDocument", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DocumentExt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DtmCrt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DtmUpd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LoanId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UsrCrt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsrUpd")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId");
+
+                    b.ToTable("LoanDocuments");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanScheme", b =>
@@ -388,6 +439,7 @@ namespace SiKoperasi.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CityId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
@@ -395,6 +447,7 @@ namespace SiKoperasi.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DistrictId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("DtmCrt")
@@ -408,6 +461,7 @@ namespace SiKoperasi.DataAccess.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProvinceId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Rt")
@@ -419,6 +473,7 @@ namespace SiKoperasi.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubDistrictId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UsrCrt")
@@ -448,6 +503,10 @@ namespace SiKoperasi.DataAccess.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Company")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DtmCrt")
                         .HasColumnType("datetime2");
@@ -485,7 +544,7 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasIndex("MemberId")
                         .IsUnique();
 
-                    b.ToTable("Job");
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Members.Member", b =>
@@ -555,6 +614,52 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.ToTable("Members");
                 });
 
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Members.MemberDocument", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DocumentExt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DtmCrt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DtmUpd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MemberId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UsrCrt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsrUpd")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("MembersDocument");
+                });
+
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.Saving", b =>
                 {
                     b.Property<string>("Id")
@@ -619,14 +724,25 @@ namespace SiKoperasi.DataAccess.Migrations
                         .IsRequired();
 
                     b.HasOne("SiKoperasi.DataAccess.Models.Members.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
+                        .WithOne("Loan")
+                        .HasForeignKey("SiKoperasi.DataAccess.Models.Loans.Loan", "MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LoanScheme");
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanDocument", b =>
+                {
+                    b.HasOne("SiKoperasi.DataAccess.Models.Loans.Loan", "Loan")
+                        .WithMany("LoanDocuments")
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
@@ -665,12 +781,16 @@ namespace SiKoperasi.DataAccess.Migrations
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Members.Address", b =>
                 {
                     b.HasOne("SiKoperasi.DataAccess.Models.MasterData.City", "City")
-                        .WithMany()
-                        .HasForeignKey("CityId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SiKoperasi.DataAccess.Models.MasterData.District", "District")
-                        .WithMany()
-                        .HasForeignKey("DistrictId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SiKoperasi.DataAccess.Models.Members.Member", "Member")
                         .WithMany("Addresses")
@@ -679,12 +799,16 @@ namespace SiKoperasi.DataAccess.Migrations
                         .IsRequired();
 
                     b.HasOne("SiKoperasi.DataAccess.Models.MasterData.Province", "Province")
-                        .WithMany()
-                        .HasForeignKey("ProvinceId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SiKoperasi.DataAccess.Models.MasterData.SubDistrict", "SubDistrict")
-                        .WithMany()
-                        .HasForeignKey("SubDistrictId");
+                        .WithMany("Addresses")
+                        .HasForeignKey("SubDistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("City");
 
@@ -708,6 +832,17 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("Member");
                 });
 
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Members.MemberDocument", b =>
+                {
+                    b.HasOne("SiKoperasi.DataAccess.Models.Members.Member", "Member")
+                        .WithMany("MemberDocuments")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.Saving", b =>
                 {
                     b.HasOne("SiKoperasi.DataAccess.Models.Members.Member", "Member")
@@ -722,21 +857,34 @@ namespace SiKoperasi.DataAccess.Migrations
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.Loan", b =>
                 {
                     b.Navigation("InstalmentSchedules");
+
+                    b.Navigation("LoanDocuments");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("Districts");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.District", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("SubDistricts");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.Province", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("Cities");
+                });
+
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.SubDistrict", b =>
+                {
+                    b.Navigation("Addresses");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Members.Member", b =>
@@ -745,6 +893,11 @@ namespace SiKoperasi.DataAccess.Migrations
 
                     b.Navigation("Job")
                         .IsRequired();
+
+                    b.Navigation("Loan")
+                        .IsRequired();
+
+                    b.Navigation("MemberDocuments");
 
                     b.Navigation("Savings");
                 });

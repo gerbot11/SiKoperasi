@@ -31,7 +31,7 @@ namespace SiKoperasi.Web.Middleware
 
             ErrorModel errorModel = new()
             {
-                ErrorMessage = ex.Message,
+                ErrorMessage = ex.InnerException is null ? ex.Message : ex.InnerException.Message,
                 Status = (int) code
             };
 

@@ -11,8 +11,5 @@
         public DateTime RegistrationDate { get; set; }
         public string PhoneNumber { get; set; }
         public string? NpwpNo { get; set; }
-
-        public JobCreateDto Job { get; set; }
-        public List<AddressCreateDto> Address { get; set; }
     }
 }

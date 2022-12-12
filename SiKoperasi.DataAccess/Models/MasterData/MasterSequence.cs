@@ -14,9 +14,6 @@ namespace SiKoperasi.DataAccess.Models.MasterData
         public int Year { get; set; }
         public int Month { get; set; }
 
-        public const string MEMBER_CODE = "MEM";
-        public const string LOAN_CODE = "LOS";
-
         public const int MAX_NUM_LENGTH = 10;
         public const int MIN_NUM_LENGTH = 4;
 

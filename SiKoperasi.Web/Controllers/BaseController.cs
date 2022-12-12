@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace SiKoperasi.Web.Controllers
 {
@@ -11,6 +11,11 @@ namespace SiKoperasi.Web.Controllers
         public BaseController(ILogger<TController> logger)
         {
             this.logger = logger;
+        }
+
+        protected void LoggingPayload<TPayload>(TPayload payload) where TPayload : class
+        {
+            logger.LogInformation(typeof(TPayload).Name + "\n" + JsonConvert.SerializeObject(payload, Formatting.Indented));
         }
     }
 }

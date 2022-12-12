@@ -2,6 +2,7 @@
 {
     public class AddressCreateDto
     {
+        public string MemberId { get; set; }
         public string AddressType { get; set; }
         public string Description { get; set; }
         public string Rt { get; set; }

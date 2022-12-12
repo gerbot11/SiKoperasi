@@ -13,14 +13,15 @@ namespace SiKoperasi.Web.Controllers
             this.provinceService = provinceService;
         }
 
-        [HttpGet("province")]
+        [HttpGet()]
         public async Task<IActionResult> GetProvince([FromQuery] QueryParamDto dto)
         {
+            LoggingPayload(dto);
             var result = await provinceService.GetProvincePagingAsync(dto);
             return Ok(result);
         }
 
-        [HttpGet("province/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetProvinceById(string id)
         {
             var result = await provinceService.GetProvinceAsync(id);

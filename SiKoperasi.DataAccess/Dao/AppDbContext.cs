@@ -24,11 +24,14 @@ namespace SiKoperasi.DataAccess.Dao
         //Member
         public virtual DbSet<Member> Members { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<MemberDocument> MembersDocument { get; set; }
+        public virtual DbSet<Job> Jobs { get; set; }
 
         //Loan
         public virtual DbSet<Loan> Loans { get; set; }
         public virtual DbSet<LoanScheme> LoanSchemes { get; set; }
         public virtual DbSet<InstalmentSchedule> InstalmentSchedules { get; set; }
+        public virtual DbSet<LoanDocument> LoanDocuments { get; set; }
 
         //Savings
         public virtual DbSet<Saving> Savings { get; set; }

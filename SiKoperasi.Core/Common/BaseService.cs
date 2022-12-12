@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace SiKoperasi.Core.Common
 {
@@ -8,9 +9,11 @@ namespace SiKoperasi.Core.Common
         where TResult : class
     {
         protected TDbContext dbContext;
-        public BaseService(TDbContext dbContext)
+        protected IMapper mapper;
+        public BaseService(TDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
 
         protected virtual async Task<TResult> GetResultByIdAsync(string id)
@@ -23,7 +26,7 @@ namespace SiKoperasi.Core.Common
             return result;
         }
 
-        protected virtual async Task<IEnumerable<TResult>> GetResultsListAsync()
+        protected virtual IEnumerable<TResult> GetResultsListAsync()
         {
             IQueryable<TModel> modelsRes = GetAppDbSet();
             if (!modelsRes.Any())
@@ -33,8 +36,12 @@ namespace SiKoperasi.Core.Common
             return result;
         }
 
+        private TResult MappingResultValue(TModel model)
+        {
+            return mapper.Map<TResult>(model);
+        }
+
         protected abstract DbSet<TModel> GetAppDbSet();
-        protected abstract TResult MappingResultValue(TModel model);
         protected abstract IEnumerable<TResult> MappingResultListValue(IQueryable<TModel> models);
     }
 }

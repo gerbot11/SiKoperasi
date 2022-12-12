@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.SubDistrict;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.MasterData;
 
@@ -19,22 +21,34 @@ namespace SiKoperasi.AppService.Services.Master
             await BaseCreateAsync(payload);
         }
 
+        public async Task EditSubDistrictAsync(SubDistrictEditDto payload)
+        {
+            await BaseEditAsync(payload.Id, payload);
+        }
+
+        public async Task DeleteSubDistrictAsync(string id)
+        {
+            await BaseDeleteAsync(id);
+        }
+
         public SubDistrict GetSubDistrictModel(string id)
         {
             return GetModelById(id);
         }
 
+        public async Task<SubDistrictDto> GetSubDistrictAsync(string id)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        public async Task<PagingModel<SubDistrictDto>> GetSubDistrictPagingAsync(QueryParamDto queryParam)
+        {
+            return await GetPagingDataDtoAsync(queryParam);
+        }
+
         protected override SubDistrict CreateNewModel(SubDistrictCreateDto payload)
         {
-            SubDistrict subDistrict = new()
-            {
-                Name = payload.Name,
-                Code = payload.Code,
-                PostalCode = payload.PostalCode,
-                DistrictId = payload.DistrictId,
-            };
-
-            return subDistrict;
+            return mapper.Map<SubDistrict>(payload);
         }
 
         protected override DbSet<SubDistrict> GetAppDbSet()
@@ -42,9 +56,16 @@ namespace SiKoperasi.AppService.Services.Master
             return dbContext.SubDistricts;
         }
 
+        protected override string SetDefaultOrderField()
+        {
+            return nameof(SubDistrict.Name);
+        }
+
         protected override void SetModelValue(SubDistrict model, SubDistrictEditDto payload)
         {
-            throw new NotImplementedException();
+            model.Name = payload.Name;
+            model.Code = payload.Code;
+            model.PostalCode = payload.PostalCode;
         }
 
         protected override IQueryable<SubDistrict> SetQueryable()
@@ -54,17 +75,20 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override void ValidateCreate(SubDistrict model)
         {
-            return;
+            if (dbContext.SubDistricts.Any(a => a.Code == model.Code))
+                throw new Exception($"Sub District with Code {model.Code} already exist");
         }
 
         protected override void ValidateDelete(SubDistrict model)
         {
-            throw new NotImplementedException();
+            if (dbContext.Addresses.Any(a => a.SubDistrictId == model.Id))
+                throw new Exception("Cannot Delete, Reference to Address");
         }
 
         protected override void ValidateEdit(SubDistrict model)
         {
-            throw new NotImplementedException();
+            if (dbContext.SubDistricts.Any(a => a.Code == model.Code && a.Id != model.Id))
+                throw new Exception($"Sub District with Code {model.Code} already exist");
         }
     }
 }

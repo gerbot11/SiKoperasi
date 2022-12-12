@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Data;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SiKoperasi.Core.Common
 {
@@ -23,7 +24,7 @@ namespace SiKoperasi.Core.Common
         protected virtual async Task<TResult> GetByIdAsync(string id)
         {
             TModel? result = await GetModelByIdAsync(id);
-            return MappingDto(result);
+            return MappingToResult(result);
         }
 
         protected virtual async Task<TModel> GetModelByIdAsync(string id)
@@ -48,24 +49,39 @@ namespace SiKoperasi.Core.Common
 
         protected virtual async Task<PagingModel<TModel>> GetPagingDataAsync(IQueryParam queryParam)
         {
+            queryParam.OrderBy ??= SetDefaultOrderField();
+            queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
+
             return await PagingModel<TModel>.CreateAsync(SetQueryable(), queryParam);
         }
 
-        protected virtual async Task BaseCreateAsync(TPayload payload)
+        protected virtual async Task<PagingModel<TResult>> GetPagingDataDtoAsync(IQueryParam queryParam)
+        {
+            queryParam.OrderBy ??= SetDefaultOrderField();
+            queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
+
+            return await PagingModel<TModel>.CreateDtoPagingAsync(SetQueryable(), queryParam, MappingToResult);
+        }
+
+        protected virtual async Task<TResult> BaseCreateAsync(TPayload payload)
         {
             TModel model = CreateNewModel(payload);
             ValidateCreate(model);
             dbContext.Add(model);
             await dbContext.SaveChangesAsync();
+
+            return MappingToResult(model);
         }
 
-        protected virtual async Task BaseEditAsync(string id, TPayloadEdit payload)
+        protected virtual async Task<TResult> BaseEditAsync(string id, TPayloadEdit payload)
         {
             TModel modeledit = await GetModelByIdAsync(id);
             SetModelValue(modeledit, payload);
             ValidateEdit(modeledit);
             dbContext.Update(modeledit);
             await dbContext.SaveChangesAsync();
+
+            return MappingToResult(modeledit);
         }
 
         protected virtual async Task BaseDeleteAsync(string id)
@@ -76,7 +92,7 @@ namespace SiKoperasi.Core.Common
             await dbContext.SaveChangesAsync();
         }
 
-        protected virtual TResult MappingDto(TModel model)
+        protected virtual TResult MappingToResult(TModel model)
         {
             return mapper.Map<TResult>(model);
         }
@@ -88,5 +104,6 @@ namespace SiKoperasi.Core.Common
         protected abstract void ValidateEdit(TModel model);
         protected abstract void ValidateCreate(TModel model);
         protected abstract void SetModelValue(TModel model, TPayloadEdit payload);
+        protected abstract string SetDefaultOrderField();
     }
 }
