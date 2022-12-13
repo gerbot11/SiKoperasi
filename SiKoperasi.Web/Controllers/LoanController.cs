@@ -8,9 +8,11 @@ namespace SiKoperasi.Web.Controllers
     public class LoanController : BaseController<LoanController>
     {
         private readonly ILoanService loanService;
-        public LoanController(ILogger<LoanController> logger, ILoanService loanService) : base(logger)
+        private readonly IInstalmentService instalmentService;
+        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService) : base(logger)
         {
             this.loanService = loanService;
+            this.instalmentService = instalmentService;
         }
 
         [HttpPost("[action]")]
@@ -24,6 +26,13 @@ namespace SiKoperasi.Web.Controllers
         public async Task<IActionResult> GetListLoan([FromQuery] QueryParamDto queryParam)
         {
             var data = await loanService.GetLoanPagingAsync(queryParam);
+            return Ok(data);
+        }
+
+        [HttpPost("[action]/{loanid}")]
+        public async Task<IActionResult> CalculateInstalment(string loanid)
+        {
+            var data = await loanService.CalculateLoanInstSchdl(loanid);
             return Ok(data);
         }
     }

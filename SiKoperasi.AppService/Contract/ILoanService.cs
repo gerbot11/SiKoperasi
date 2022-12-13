@@ -6,6 +6,7 @@ namespace SiKoperasi.AppService.Contract
 {
     public interface ILoanService
     {
+        Task<List<InstSchdlDto>> CalculateLoanInstSchdl(string loanid);
         Task<LoanDto> CreateLoanAsync(LoanCreateDto payload);
         Task<LoanDto> GetLoanAsync(string id);
         Task<PagingModel<LoanDto>> GetLoanPagingAsync(QueryParamDto queryParam);

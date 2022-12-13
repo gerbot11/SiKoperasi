@@ -14,8 +14,10 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public string MemberId { get; set; }
         public string LoanNo { get; set; }
         public DateTime LoanDate { get; set; }
+        public DateTime EffectiveDate { get; set; }
         public int? CurrentDueNum { get; set; }
         public int? NextDueNum { get; set; }
+        public int LoanDueNum { get; set; }
         public string LoanSchemeId { get; set; }
         public decimal LoanAmount { get; set; }
         public string Status { get; set; }
@@ -28,6 +30,7 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public const string LOAN_STATUS_NEW = "NEW";
         public const string LOAN_STATUS_ONCHECK = "CHK";
         public const string LOAN_STATUS_LIVE = "LIV";
+        public const string LOAN_STATUS_RETURN = "RET";
 
         public const string LOAN_SEQ_CODE = "LOS";
     }

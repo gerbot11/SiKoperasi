@@ -1,8 +1,6 @@
-﻿using SiKoperasi.Core.Data;
-
-namespace SiKoperasi.DataAccess.Models.Loans
+﻿namespace SiKoperasi.AppService.Dto.Loan
 {
-    public class InstalmentSchedule : BaseModel
+    public class InstSchdlDto
     {
         public string LoanId { get; set; }
         public int SeqNo { get; set; }
@@ -15,7 +13,5 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public decimal OsPrincipalAmount { get; set; }
         public decimal OsInterestAmount { get; set; }
         public decimal? LateChargeAmount { get; set; }
-
-        public Loan Loan { get; set; }
     }
 }

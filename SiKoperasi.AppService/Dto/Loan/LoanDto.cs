@@ -12,6 +12,7 @@ namespace SiKoperasi.AppService.Dto.Loan
         public DateTime LoanDate { get; set; }
         public int? CurrentDueNum { get; set; }
         public int? NextDueNum { get; set; }
+        public DateTime EffectiveDate { get; set; }
         public string LoanSchemeId { get; set; }
         public decimal LoanAmount { get; set; }
         public string Status { get; set;}

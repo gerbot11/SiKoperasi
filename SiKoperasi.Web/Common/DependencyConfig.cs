@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Services.Common;
 using SiKoperasi.AppService.Services.Loans;
 using SiKoperasi.AppService.Services.Master;
 using SiKoperasi.AppService.Services.Members;
@@ -34,6 +35,7 @@ namespace SiKoperasi.Web.Common
             service.AddScoped<IMemberService, MemberService>();
 
             service.AddScoped<ILoanService, LoanService>();
+            service.AddScoped<IInstalmentService, InstalmentService>();
         }
 
         private static void AddAutoMapper(IServiceCollection service)
