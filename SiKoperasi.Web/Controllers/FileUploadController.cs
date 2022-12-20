@@ -5,7 +5,10 @@ namespace SiKoperasi.Web.Controllers
 {
     public class FileUploadController : BaseController<FileUploadController>
     {
-        public FileUploadController(ILogger<FileUploadController> logger) : base(logger)
+        private const string UPL_FOLDER = "FileUpload";
+        private readonly IWebHostEnvironment env;
+        private readonly IFileUploadExtService fileUploadExtService;
+        public FileUploadController(ILogger<FileUploadController> logger, IWebHostEnvironment env, IFileUploadExtService fileUploadExtService) : base(logger)
         {
         }
 
