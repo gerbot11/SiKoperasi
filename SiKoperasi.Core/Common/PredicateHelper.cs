@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
 
@@ -31,6 +32,26 @@ namespace SiKoperasi.Core.Common
             }
 
             return null;
+        }
+
+        public static List<Expression<Func<T, bool>>> SetListPredicateExpression(List<PropertyInfo> propertyInfos, string value)
+        {
+            List<Expression<Func<T, bool>>> expressions = new();
+            ParameterExpression param = Expression.Parameter(typeof(T));
+
+            MethodInfo? method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+
+            foreach (var item in propertyInfos)
+            {
+                Expression<Func<T, bool>> expression;
+                Expression left = Expression.Property(param, item.Name);
+                Expression right = Expression.Constant(value, value.GetType());
+                MethodCallExpression body = Expression.Call(left, method, right);
+                expression = Expression.Lambda<Func<T, bool>>(body, param);
+                expressions.Add(expression);
+            }
+            
+            return expressions;
         }
 
         public static Expression<Func<T, object>> SetPredicateExpression(string orderBy)

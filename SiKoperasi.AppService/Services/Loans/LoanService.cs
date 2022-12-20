@@ -7,7 +7,6 @@ using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Loans;
-using SiKoperasi.DataAccess.Models.Members;
 
 namespace SiKoperasi.AppService.Services.Loans
 {
@@ -23,12 +22,12 @@ namespace SiKoperasi.AppService.Services.Loans
 
         public async Task<LoanDto> GetLoanAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
         }
 
         public async Task<PagingModel<LoanDto>> GetLoanPagingAsync(QueryParamDto queryParam)
         {
-            return await GetPagingDataDtoAsync(queryParam);
+            return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
         public async Task<LoanDto> CreateLoanAsync(LoanCreateDto payload)
@@ -38,19 +37,12 @@ namespace SiKoperasi.AppService.Services.Loans
 
         public async Task<List<InstSchdlDto>> CalculateLoanInstSchdl(string loanid)
         {
-            Loan? loan = await dbContext.Loans.FindAsync(loanid);
-            if (loan is null)
-            {
-                throw new Exception("Loan Data Is Not Found");
-            }
-
+            Loan loan = BaseGetModelById(loanid);
             List<InstalmentSchedule> oldInstSchdl = dbContext.InstalmentSchedules.Where(a => a.LoanId == loanid).ToList();
             if (oldInstSchdl.Any())
             {
                 for (int i = 0; i < oldInstSchdl.Count; i++)
-                {
                     dbContext.InstalmentSchedules.Remove(oldInstSchdl[i]);
-                }
             }
 
             loan.LoanScheme = dbContext.LoanSchemes.First(a => a.Id == loan.LoanSchemeId);
@@ -60,23 +52,50 @@ namespace SiKoperasi.AppService.Services.Loans
             dbContext.Loans.Update(loan);
             await dbContext.SaveChangesAsync();
 
-            var listDto = (from a in listInstSchdl
-                           select new InstSchdlDto
-                           {
-                               InstAmount = a.InstAmount,
-                               InstDate = a.InstDate,
-                               InterestAmount = a.InterestAmount,
-                               PrincipalAmount = a.PrincipalAmount,
-                               OsInterestAmount = a.OsInterestAmount,
-                               OsPrincipalAmount = a.OsPrincipalAmount,
-                               SeqNo = a.SeqNo
-                           }).ToList();
-
-            return listDto;
+            return mapper.Map<ICollection<InstalmentSchedule>, List<InstSchdlDto>>(loan.InstalmentSchedules);
         }
 
+        public async Task CreateLoanDocumentAsync(List<LoanDocumentDto> payload, string loanid)
+        {
+            Loan loan = await BaseGetModelByIdAsync(loanid);
+            
+            foreach (var item in payload)
+            {
+                LoanDocument loanDocument = new()
+                {
+                    FileName = item.DocumentFiles.FileName,
+                    FileExt = Path.GetExtension(item.DocumentFiles.FileName),
+                    RefLoanDocumentId = item.RefLoanDocumentId,
+                    FileSize = (int)item.DocumentFiles.Length,
+                    FileUrl = "No Available Yet"
+                };
+
+                await ValidateLoanDocument(loanDocument);
+                loan.LoanDocuments.Add(loanDocument);
+            }
+
+            dbContext.Loans.Update(loan);
+            await dbContext.SaveChangesAsync();
+        }
+
+        #region Private Method
+        private async Task ValidateLoanDocument(LoanDocument model)
+        {
+            RefLoanDocument? docSetting = await dbContext.RefLoanDocuments.FindAsync(model.RefLoanDocumentId);
+            if (docSetting is null)
+                throw new Exception("Loan Document Setting is Not Found!");
+
+            List<string> fileExtSetting = docSetting.AcceptedFileExt.Split(";").ToList();
+            if (!fileExtSetting.Contains(model.FileExt))
+                throw new Exception("Unmatch File Extension Setting with Uploaded File");
+
+            if (model.FileSize > docSetting.MaxFileSize)
+                throw new Exception("Max File Size has been Exeed!");
+        }
+        #endregion
+
         #region Override Base Method
-        protected override async Task<PagingModel<LoanDto>> GetPagingDataDtoAsync(IQueryParam queryParam)
+        protected override async Task<PagingModel<LoanDto>> BaseGetPagingDataDtoAsync(IQueryParam queryParam)
         {
             IQueryable<LoanDto> query = from a in dbContext.Loans
                                         join b in dbContext.Members on a.MemberId equals b.Id
@@ -97,6 +116,9 @@ namespace SiKoperasi.AppService.Services.Loans
                                             EffectiveDate = a.EffectiveDate,
                                             Status = a.Status
                                         };
+
+            if (string.IsNullOrEmpty(queryParam.OrderBy))
+                queryParam.OrderBy = nameof(LoanDto.LoanDate);
 
             return await PagingModel<LoanDto>.CreateAsync(query, queryParam);
         }

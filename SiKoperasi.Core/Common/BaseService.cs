@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SiKoperasi.Core.Data;
 
 namespace SiKoperasi.Core.Common
 {
@@ -32,8 +33,16 @@ namespace SiKoperasi.Core.Common
             if (!modelsRes.Any())
                 return Enumerable.Empty<TResult>();
 
-            IEnumerable<TResult> result = MappingResultListValue(modelsRes);
+            IEnumerable<TResult> result = MappingModelToResultList(modelsRes);
             return result;
+        }
+
+        protected virtual async Task<PagingModel<TResult>> GetPagingDataDtoAsync(IQueryParam queryParam)
+        {
+            queryParam.OrderBy ??= SetDefaultOrderField();
+            queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
+
+            return await PagingModel<TModel>.CreateDtoPagingAsync(SetQueryable(), queryParam, MappingResultValue);
         }
 
         private TResult MappingResultValue(TModel model)
@@ -41,7 +50,13 @@ namespace SiKoperasi.Core.Common
             return mapper.Map<TResult>(model);
         }
 
+        private IEnumerable<TResult> MappingModelToResultList(IQueryable<TModel> source)
+        {
+            return mapper.Map<IQueryable<TModel>, IEnumerable<TResult>>(source);
+        }
+
         protected abstract DbSet<TModel> GetAppDbSet();
-        protected abstract IEnumerable<TResult> MappingResultListValue(IQueryable<TModel> models);
+        protected abstract IQueryable<TModel> SetQueryable();
+        protected abstract string SetDefaultOrderField();
     }
 }

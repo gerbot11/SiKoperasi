@@ -11,10 +11,10 @@ namespace SiKoperasi.AppService.Services.Members
 {
     public class AddressService : BaseCrudService<Address, AddressCreateDto, AddressEditDto, AddressDto, AppDbContext>, IAddressService
     {
-        private readonly IMemberService memberService;
-        public AddressService(AppDbContext dbContext, IMapper mapper, IMemberService memberService) : base(dbContext, mapper)
+        //private readonly IMemberService memberService;
+        public AddressService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
         {
-            this.memberService = memberService;
+            //this.memberService = memberService;
         }
 
         public async Task CreateAddressAsync(AddressCreateDto payload)
@@ -29,7 +29,7 @@ namespace SiKoperasi.AppService.Services.Members
 
         public async Task<AddressDto> GetAddressAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
         }
 
         public async Task DeleteAddressAsync(string id)

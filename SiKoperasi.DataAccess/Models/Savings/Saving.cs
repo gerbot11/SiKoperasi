@@ -7,15 +7,16 @@ namespace SiKoperasi.DataAccess.Models.Savings
     {
         public Saving()
         {
-            Transaction = new HashSet<SavingTransaction>();
+            SavingTransactions = new HashSet<SavingTransaction>();
         }
 
         public string MemberId { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal CutAmount { get; set; }
-        public string SavingType { get; set; }
+        public string RefSavingTypeId { get; set; }
 
         public virtual Member Member { get; set; }
-        public ICollection<SavingTransaction>? Transaction { get; set; }
+        public virtual RefSavingType RefSavingType { get; set; }
+        public ICollection<SavingTransaction> SavingTransactions { get; set; }
     }
 }

@@ -10,6 +10,7 @@ namespace SiKoperasi.Web.Controllers
         private readonly IMemberService memberService;
         private readonly IJobService jobService;
         private readonly IAddressService addressService;
+        
         public MemberController(ILogger<MemberController> logger, IMemberService memberService, IJobService jobService, IAddressService addressService) : base(logger)
         {
             this.memberService = memberService;
@@ -27,7 +28,7 @@ namespace SiKoperasi.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMember([FromQuery] QueryParamDto queryparam)
+        public async Task<IActionResult> GetListMember([FromQuery] QueryParamDto queryparam)
         {
             var data = await memberService.GetMemberPagingAsync(queryparam);
             return Ok(data);

@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using SiKoperasi.AppService.Dto.Common;
+using SiKoperasi.Web.Common;
 
 namespace SiKoperasi.Web.Controllers
 {
@@ -10,12 +11,24 @@ namespace SiKoperasi.Web.Controllers
         private readonly IFileUploadExtService fileUploadExtService;
         public FileUploadController(ILogger<FileUploadController> logger, IWebHostEnvironment env, IFileUploadExtService fileUploadExtService) : base(logger)
         {
+            this.env = env;
+            this.fileUploadExtService = fileUploadExtService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(List<IFormFile> files)
+        [HttpPost("[action]")]
+        public async Task<FileUploadDto> UploadFile(IFormFileCollection formFiles, string code)
         {
-            return Ok();
+            string finalPath = string.Empty;
+            string baseLoc = env.ContentRootPath+ "/" + code;
+
+            var file = fileUploadExtService.GoogleDriveUpload(code);
+            FileUploadDto dto = new()
+            {
+                FileName = "Test",
+                FullPath = file
+            };
+
+            return dto;
         }
     }
 }

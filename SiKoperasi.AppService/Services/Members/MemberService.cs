@@ -13,10 +13,12 @@ namespace SiKoperasi.AppService.Services.Members
     public class MemberService : BaseCrudService<Member, MemberCreateDto, MemberEditDto, MemberDto, AppDbContext>, IMemberService
     {
         private readonly IMasterSequenceService masterSequenceService;
-        public MemberService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService) 
+        private readonly ISavingService savingService;
+        public MemberService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, ISavingService savingService) 
             : base(dbContext, mapper)
         {
             this.masterSequenceService = masterSequenceService;
+            this.savingService = savingService;
         }
 
         public async Task<MemberDto> CreateMemberAsync(MemberCreateDto payload)
@@ -26,12 +28,17 @@ namespace SiKoperasi.AppService.Services.Members
 
         public async Task<MemberDto> GetMemberAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
+        }
+
+        public async Task<Member> GetMemberModelAsync(string id)
+        {
+            return await BaseGetModelByIdAsync(id);
         }
 
         public async Task<PagingModel<MemberDto>> GetMemberPagingAsync(QueryParamDto queryParam)
         {
-            return await GetPagingDataDtoAsync(queryParam);
+            return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
         public async Task<MemberDto> EditMemberAsync(MemberEditDto payload)
@@ -49,7 +56,8 @@ namespace SiKoperasi.AppService.Services.Members
         {
             Member newMember = mapper.Map<Member>(payload);
             newMember.MemberNo = masterSequenceService.GenerateNo(Member.MEMBER_SEQ_CODE);
-            newMember.IsActive = true;
+            newMember.IsActive = false;
+            newMember.Savings = savingService.CreateSaving();
             return newMember;
         }
 

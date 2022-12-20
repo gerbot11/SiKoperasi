@@ -23,17 +23,17 @@ namespace SiKoperasi.AppService.Services.Master
 
         public async Task<CityDto> GetCityAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
         }
 
         public async Task<PagingModel<CityDto>> GetCityPagingAsync(QueryParamDto queryParam)
         {
-            return await GetPagingDataDtoAsync(queryParam);
+            return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
         public City GetCity(string id)
         {
-            return GetModelById(id);
+            return BaseGetModelById(id);
         }
 
         protected override City CreateNewModel(CityCreateDto payload)

@@ -9,11 +9,11 @@ using SiKoperasi.DataAccess.Models.Loans;
 using SiKoperasi.DataAccess.Models.MasterData;
 using SiKoperasi.DataAccess.Models.Members;
 
-namespace SiKoperasi.AppService.Util
+namespace SiKoperasi.AppService.Util.AutoMapperConfig
 {
     public class AutoMapperConfig : Profile
     {
-        public AutoMapperConfig() 
+        public AutoMapperConfig()
         {
             CreateMap<ProvinceDto, Province>().ReverseMap();
             CreateMap<ProvinceCreateDto, Province>().ReverseMap();
@@ -26,18 +26,6 @@ namespace SiKoperasi.AppService.Util
 
             CreateMap<SubDistrictCreateDto, SubDistrict>().ReverseMap();
             CreateMap<SubDistrictDto, SubDistrict>().ReverseMap();
-
-            CreateMap<MemberDto, Member>().ReverseMap();
-            CreateMap<MemberCreateDto, Member>().ReverseMap();
-
-            CreateMap<JobCreateDto, Job>().ReverseMap();
-            CreateMap<JobDto, Job>().ReverseMap();
-
-            CreateMap<AddressCreateDto, Address>().ReverseMap();
-            CreateMap<AddressDto, Address>().ReverseMap();
-
-            CreateMap<LoanCreateDto, Loan>().ReverseMap();
-            CreateMap<LoanDto, Loan>().ReverseMap();
         }
     }
 }

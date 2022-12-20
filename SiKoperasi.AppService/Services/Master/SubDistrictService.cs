@@ -33,17 +33,17 @@ namespace SiKoperasi.AppService.Services.Master
 
         public SubDistrict GetSubDistrictModel(string id)
         {
-            return GetModelById(id);
+            return BaseGetModelById(id);
         }
 
         public async Task<SubDistrictDto> GetSubDistrictAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
         }
 
         public async Task<PagingModel<SubDistrictDto>> GetSubDistrictPagingAsync(QueryParamDto queryParam)
         {
-            return await GetPagingDataDtoAsync(queryParam);
+            return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
         protected override SubDistrict CreateNewModel(SubDistrictCreateDto payload)

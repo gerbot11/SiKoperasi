@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Enums;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -50,23 +50,30 @@ namespace SiKoperasi.Core.Data
             if (string.IsNullOrEmpty(queryParam.SearchQuery))
                 return source;
 
-            PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            List<PropertyInfo> props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(a => a.PropertyType == typeof(string) && !a.Name.Contains("Id") && !a.Name.Contains("Usr")).ToList();
 
-            Dictionary<object, object> searchProps = SetListSearchQueryFieldAndValue(queryParam.SearchQuery);
-
-            foreach (KeyValuePair<object, object> item in searchProps)
+            List<Expression<Func<T, bool>>> expresions = PredicateHelper<T>.SetListPredicateExpression(props, queryParam.SearchQuery);
+            
+            string expString = string.Empty;
+            for (int i = 0; i < expresions.Count; i++)
             {
-                PropertyInfo? property = props.FirstOrDefault(a => a.Name == item.Key.ToString());
-                if (property is null)
+                if (i == expresions.Count - 1 && i == 0)
                 {
-                    throw new Exception("Invalid Field for Searching!");
+                    expString = expresions[i].ToString();
+                    break;
                 }
-
-                Expression<Func<T, bool>> expression = PredicateHelper<T>.SetPredicateExpression(property, item.Value);
-                source = source.Where(expression);
+                else if (i == 0)
+                {
+                    expString += expresions[i].ToString();
+                }
+                else
+                {
+                    expString += " OR " + expresions[i].Body.ToString();
+                }
             }
 
-            return source;
+            return source.Where(expString);
         }
 
         private static IQueryable<T> SetSortingQueryable(IQueryable<T> source, IQueryParam queryParam)
@@ -75,21 +82,15 @@ namespace SiKoperasi.Core.Data
                 return source;
 
             PropertyInfo? property = typeof(T).GetProperty(queryParam.OrderBy);
-            if (property == null)
-            {
-                throw new Exception("Invalid Field for Order!");
-            }
+            if (property is null)
+                throw new Exception($"Invalid Field '{queryParam.OrderBy}' for Order!");
 
-            var expresionOrder = PredicateHelper<T>.SetPredicateExpression(queryParam.OrderBy);
+            Expression<Func<T, object>> expresionOrder = PredicateHelper<T>.SetPredicateExpression(queryParam.OrderBy);
 
             if (queryParam.OrderBehavior == OrderBehaviour.Asc)
-            {
                 return source.OrderBy(expresionOrder);
-            }
             else
-            {
                 return source.OrderByDescending(expresionOrder);
-            }
         }
 
         private static Dictionary<object, object> SetListSearchQueryFieldAndValue(string data)

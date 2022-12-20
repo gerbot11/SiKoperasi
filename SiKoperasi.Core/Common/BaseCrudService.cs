@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Data;
-using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SiKoperasi.Core.Common
 {
@@ -21,33 +19,33 @@ namespace SiKoperasi.Core.Common
             this.mapper = mapper;
         }
 
-        protected virtual async Task<TResult> GetByIdAsync(string id)
+        protected virtual async Task<TResult> BaseGetByIdAsync(string id)
         {
-            TModel? result = await GetModelByIdAsync(id);
+            TModel? result = await BaseGetModelByIdAsync(id);
             return MappingToResult(result);
         }
 
-        protected virtual async Task<TModel> GetModelByIdAsync(string id)
+        protected virtual async Task<TModel> BaseGetModelByIdAsync(string id)
         {
             TModel? result = await GetAppDbSet().FindAsync(id);
 
             if (result is null)
-                throw new Exception("Data Not Found!");
+                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
 
             return result;
         }
 
-        protected virtual TModel GetModelById(string id)
+        protected virtual TModel BaseGetModelById(string id)
         {
             TModel? result = GetAppDbSet().Find(id);
 
             if (result is null)
-                throw new Exception("Data Not Found!");
+                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
 
             return result;
         }
 
-        protected virtual async Task<PagingModel<TModel>> GetPagingDataAsync(IQueryParam queryParam)
+        protected virtual async Task<PagingModel<TModel>> BaseGetPagingDataAsync(IQueryParam queryParam)
         {
             queryParam.OrderBy ??= SetDefaultOrderField();
             queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
@@ -55,7 +53,7 @@ namespace SiKoperasi.Core.Common
             return await PagingModel<TModel>.CreateAsync(SetQueryable(), queryParam);
         }
 
-        protected virtual async Task<PagingModel<TResult>> GetPagingDataDtoAsync(IQueryParam queryParam)
+        protected virtual async Task<PagingModel<TResult>> BaseGetPagingDataDtoAsync(IQueryParam queryParam)
         {
             queryParam.OrderBy ??= SetDefaultOrderField();
             queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
@@ -75,7 +73,7 @@ namespace SiKoperasi.Core.Common
 
         protected virtual async Task<TResult> BaseEditAsync(string id, TPayloadEdit payload)
         {
-            TModel modeledit = await GetModelByIdAsync(id);
+            TModel modeledit = await BaseGetModelByIdAsync(id);
             SetModelValue(modeledit, payload);
             ValidateEdit(modeledit);
             dbContext.Update(modeledit);
@@ -86,7 +84,7 @@ namespace SiKoperasi.Core.Common
 
         protected virtual async Task BaseDeleteAsync(string id)
         {
-            TModel model = await GetModelByIdAsync(id);
+            TModel model = await BaseGetModelByIdAsync(id);
             ValidateDelete(model);
             dbContext.Remove(model);
             await dbContext.SaveChangesAsync();

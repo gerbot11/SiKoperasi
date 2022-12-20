@@ -150,29 +150,30 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("DocumentExt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocumentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("DtmCrt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DtmUpd")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("FileUrl")
+                    b.Property<string>("FileExt")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("FileSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("LoanId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RefLoanDocumentId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -187,6 +188,8 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LoanId");
+
+                    b.HasIndex("RefLoanDocumentId");
 
                     b.ToTable("LoanDocuments");
                 });
@@ -226,6 +229,51 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LoanSchemes");
+                });
+
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.RefLoanDocument", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AcceptedFileExt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DtmCrt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DtmUpd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaxFileSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsrCrt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsrUpd")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefLoanDocuments");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
@@ -669,6 +717,46 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.ToTable("MembersDocument");
                 });
 
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.RefSavingType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal?>("CutAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DtmCrt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DtmUpd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MinimalAmountDeposit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SavingName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsrCrt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsrUpd")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefSavingTypes");
+                });
+
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.Saving", b =>
                 {
                     b.Property<string>("Id")
@@ -687,9 +775,9 @@ namespace SiKoperasi.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("SavingType")
+                    b.Property<string>("RefSavingTypeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
@@ -705,6 +793,8 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("RefSavingTypeId");
 
                     b.ToTable("Savings");
                 });
@@ -730,16 +820,20 @@ namespace SiKoperasi.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("TrDate")
+                    b.Property<DateTime>("TrxDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("TrMethod")
+                    b.Property<string>("TrxMethod")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TrNo")
+                    b.Property<string>("TrxNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrxType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<string>("UsrCrt")
                         .IsRequired()
@@ -753,7 +847,7 @@ namespace SiKoperasi.DataAccess.Migrations
 
                     b.HasIndex("SavingId");
 
-                    b.ToTable("SavingTransaction");
+                    b.ToTable("SavingTransactions");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.InstalmentSchedule", b =>
@@ -794,7 +888,15 @@ namespace SiKoperasi.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SiKoperasi.DataAccess.Models.Loans.RefLoanDocument", "RefLoanDocument")
+                        .WithMany("Documents")
+                        .HasForeignKey("RefLoanDocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Loan");
+
+                    b.Navigation("RefLoanDocument");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
@@ -903,13 +1005,21 @@ namespace SiKoperasi.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SiKoperasi.DataAccess.Models.Savings.RefSavingType", "RefSavingType")
+                        .WithMany("Savings")
+                        .HasForeignKey("RefSavingTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Member");
+
+                    b.Navigation("RefSavingType");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.SavingTransaction", b =>
                 {
                     b.HasOne("SiKoperasi.DataAccess.Models.Savings.Saving", "Saving")
-                        .WithMany("Transaction")
+                        .WithMany("SavingTransactions")
                         .HasForeignKey("SavingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -922,6 +1032,11 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("InstalmentSchedules");
 
                     b.Navigation("LoanDocuments");
+                });
+
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.RefLoanDocument", b =>
+                {
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
@@ -965,9 +1080,14 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("Savings");
                 });
 
+            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.RefSavingType", b =>
+                {
+                    b.Navigation("Savings");
+                });
+
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.Saving", b =>
                 {
-                    b.Navigation("Transaction");
+                    b.Navigation("SavingTransactions");
                 });
 #pragma warning restore 612, 618
         }

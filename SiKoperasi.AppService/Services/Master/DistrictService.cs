@@ -33,17 +33,17 @@ namespace SiKoperasi.AppService.Services.Master
 
         public District GetDistrictModel(string id)
         {
-            return GetModelById(id);
+            return BaseGetModelById(id);
         }
 
         public async Task<DistrictDto> GetDistrictAsync(string id)
         {
-            return await GetByIdAsync(id);
+            return await BaseGetByIdAsync(id);
         }
 
         public async Task<PagingModel<DistrictDto>> GetDistrictPagingAsync(QueryParamDto queryParam)
         {
-            return await GetPagingDataDtoAsync(queryParam);
+            return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
         #region Abstract Implementation

@@ -16,6 +16,8 @@ namespace SiKoperasi.AppService.Dto.Common
         public OrderBehaviour? OrderBehavior { get; set; }
         [JsonProperty("search_qeury")]
         public string? SearchQuery { get; set; }
+        [JsonProperty("search_filter")]
+        public string? SearchFilter { get; set; }
 
         private const int maxSize = 200;
         private int size = 10;

@@ -9,5 +9,6 @@ namespace SiKoperasi.Core.Data
         string? OrderBy { get; set; }
         OrderBehaviour? OrderBehavior { get; set; }
         string? SearchQuery { get; set; }
+        string? SearchFilter { get; set; }
     }
 }

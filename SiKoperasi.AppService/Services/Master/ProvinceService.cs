@@ -18,18 +18,18 @@ namespace SiKoperasi.AppService.Services.Master
 
         public async Task<PagingModel<Province>> GetProvincePagingAsync(QueryParamDto dto)
         {
-            return await GetPagingDataAsync(dto);
+            return await BaseGetPagingDataAsync(dto);
         }
 
         public async Task<ProvinceDto> GetProvinceAsync(string id)
         {
-            ProvinceDto data = await GetByIdAsync(id);
+            ProvinceDto data = await BaseGetByIdAsync(id);
             return data;
         }
 
         public Province GetProvinceModel(string id)
         {
-            return GetModelById(id);
+            return BaseGetModelById(id);
         }
 
         public async Task CreateProvinceAsync(ProvinceCreateDto payload)

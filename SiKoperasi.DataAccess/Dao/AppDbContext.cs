@@ -32,9 +32,12 @@ namespace SiKoperasi.DataAccess.Dao
         public virtual DbSet<LoanScheme> LoanSchemes { get; set; }
         public virtual DbSet<InstalmentSchedule> InstalmentSchedules { get; set; }
         public virtual DbSet<LoanDocument> LoanDocuments { get; set; }
+        public virtual DbSet<RefLoanDocument> RefLoanDocuments { get; set; }
 
         //Savings
         public virtual DbSet<Saving> Savings { get; set; }
+        public virtual DbSet<SavingTransaction> SavingTransactions { get; set; }
+        public virtual DbSet<RefSavingType> RefSavingTypes { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

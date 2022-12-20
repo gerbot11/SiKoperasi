@@ -1,5 +1,8 @@
-﻿using Microsoft.VisualBasic;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Loan;
 using SiKoperasi.Core.Common;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Loans;
@@ -8,8 +11,30 @@ namespace SiKoperasi.AppService.Services.Common
 {
     public class InstalmentService : BaseSimpleService<AppDbContext>, IInstalmentService
     {
-        public InstalmentService(AppDbContext dbContext) : base(dbContext)
+        public InstalmentService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
         {
+        }
+
+        public async Task<IEnumerable<InstSchdlDto>> GetLoanInstSchdlsAsync(string loanid)
+        {
+            var instSchdls = await (from a in dbContext.InstalmentSchedules
+                                    where a.LoanId == loanid
+                                    select new InstSchdlDto
+                                    {
+                                        LoanId = a.LoanId,
+                                        InstAmount = a.InstAmount,
+                                        InstDate = a.InstDate,
+                                        InterestAmount = a.InterestAmount,
+                                        LateChargeAmount = a.LateChargeAmount,
+                                        OsInterestAmount = a.OsInterestAmount,
+                                        OsPrincipalAmount = a.OsPrincipalAmount,
+                                        PayAmount = a.PayAmount,
+                                        PayDate = a.PayDate,
+                                        PrincipalAmount = a.PrincipalAmount,
+                                        SeqNo = a.SeqNo,
+                                    }).ToListAsync();
+
+            return instSchdls;
         }
 
         public List<InstalmentSchedule> CalculateInstalmentSchdl(Loan loan)
