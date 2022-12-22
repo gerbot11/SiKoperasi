@@ -27,28 +27,5 @@ namespace SiKoperasi.Web.Controllers
             var data = await districtService.GetDistrictPagingAsync(queryParam);
             return Ok(data);
         }
-
-        [HttpPost("newdistrict")]
-        public async Task<IActionResult> CreateDistrict(DistrictCreateDto dto)
-        {
-            LoggingPayload(dto);
-            await districtService.CreateDistrictAsync(dto);
-            return Ok(dto);
-        }
-
-        [HttpPut("[action]")]
-        public async Task<IActionResult> EditDistrict(DistrictEditDto dto)
-        {
-            LoggingPayload(dto);
-            await districtService.EditDistrictAsync(dto);
-            return Ok(dto);
-        }
-
-        [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteDistrict(string id)
-        {
-            await districtService.DeleteDistrictAsync(id);
-            return NoContent();
-        }
     }
 }

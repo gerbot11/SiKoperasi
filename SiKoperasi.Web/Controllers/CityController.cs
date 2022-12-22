@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.City;
 using SiKoperasi.AppService.Dto.Common;
@@ -8,17 +9,11 @@ namespace SiKoperasi.Web.Controllers
     public class CityController : BaseController<CityController>
     {
         private readonly ICityService cityService;
-        public CityController(ILogger<CityController> logger, ICityService cityService) : base(logger)
+        private readonly IProvinceService provinceService;
+        public CityController(ILogger<CityController> logger, ICityService cityService, IProvinceService provinceService) : base(logger)
         {
             this.cityService = cityService;
-        }
-
-        [HttpPost("newcity")]
-        public async Task<IActionResult> CreateCity(CityCreateDto dto)
-        {
-            LoggingPayload(dto);
-            await cityService.CreateCityAsync(dto);
-            return Ok(dto);
+            this.provinceService = provinceService;
         }
 
         [HttpGet("{id}")]
@@ -28,7 +23,14 @@ namespace SiKoperasi.Web.Controllers
             return Ok(data);
         }
 
-        [HttpGet()]
+        [HttpGet("[action]/{provinceid}")]
+        public async Task<IActionResult> GetCityByProvince(string provinceid, [FromQuery] QueryParamDto queryParam)
+        {
+            var data = await cityService.GetListCityByProvinceAsync(provinceid, queryParam);
+            return Ok(data);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetCityPaging([FromQuery] QueryParamDto dto)
         {
             LoggingPayload(dto);

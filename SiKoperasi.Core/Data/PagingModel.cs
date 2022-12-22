@@ -1,6 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Enums;
+using System.ComponentModel;
+using System.Data;
+using System.Globalization;
+using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -29,6 +33,7 @@ namespace SiKoperasi.Core.Data
         public static async Task<PagingModel<T>> CreateAsync(IQueryable<T> source, IQueryParam queryParam)
         {
             IQueryable<T> sourceFinal = SetSearchQueryable(SetSortingQueryable(source, queryParam), queryParam);
+            sourceFinal = SetFilterQueryable(sourceFinal, queryParam);
             int count = await sourceFinal.CountAsync();
             List<T> items = await sourceFinal.Skip((queryParam.PageIndex - 1) * queryParam.PageSize).Take(queryParam.PageSize).ToListAsync();
 
@@ -39,6 +44,7 @@ namespace SiKoperasi.Core.Data
             where TResult : class
         {
             IQueryable<T> sourceFinal = SetSearchQueryable(SetSortingQueryable(source, queryParam), queryParam);
+            sourceFinal = SetFilterQueryable(sourceFinal, queryParam);
             int count = await sourceFinal.CountAsync();
             List<T> items = await sourceFinal.Skip((queryParam.PageIndex - 1) * queryParam.PageSize).Take(queryParam.PageSize).ToListAsync();
 
@@ -93,19 +99,197 @@ namespace SiKoperasi.Core.Data
                 return source.OrderByDescending(expresionOrder);
         }
 
-        private static Dictionary<object, object> SetListSearchQueryFieldAndValue(string data)
+        private static IQueryable<T> SetFilterQueryable(IQueryable<T> source, IQueryParam queryParam)
         {
-            List<string> listFilter = data.Split(Constants.SEARCH_FIELD_SEPARATOR).ToList();
-            Dictionary<object, object> searchParam = new();
-            foreach (string item in listFilter)
+            if (string.IsNullOrEmpty(queryParam.SearchFilter))
+                return source;
+
+            List<PropertyInfo> props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(a => !a.Name.Contains("Id") && !a.Name.Contains("Usr")).ToList();
+
+            ParameterExpression param = Expression.Parameter(typeof(T));
+            Expression<Func<T, bool>> fieldFilter;
+
+            var filterParam = SetListFilterQueryFieldAndValue(queryParam.SearchFilter);
+            if (!filterParam.Any())
             {
-                int pos = item.IndexOf(Constants.SEARCH_VALUE_SEPARATOR);
-                string field = item[..pos];
-                object val = item.Substring(pos + 1);
-                searchParam.Add(field, val);
+                throw new Exception("Unable to process logical operator for filter!");
             }
 
-            return searchParam;
+            foreach (var item in filterParam)
+            {
+                Expression body = param;
+                Expression? expOpr;
+                if (item.Field.Contains('.'))
+                {
+                    string[] splitField = item.Field.Split('.').ToArray();
+                    if (splitField.Length > 5)
+                        throw new Exception("Length of search parameter which separate by '.' is more than 5!");
+
+                    List<Type> listType = new(); 
+                    for (int i = 0; i < splitField.Length; i++)
+                    {
+                        string field = splitField[i];
+                        body = Expression.PropertyOrField(body, field);
+
+                        if (listType.Any())
+                        {
+                            PropertyInfo? pi = listType[i - 1].GetProperties().FirstOrDefault(a => a.Name.ToLower() == field.ToLower());
+                            if (pi is null)
+                                throw new Exception($"Invalid filter field {field}");
+
+                            listType.Add(pi.PropertyType);
+                        }
+                        else
+                        {
+                            PropertyInfo? pi = props.FirstOrDefault(a => a.Name.ToLower() == field.ToLower());
+                            if (pi is null)
+                                throw new Exception($"Invalid filter field {item.Field}");
+
+                            listType.Add(pi.PropertyType);
+                        }
+                    }
+
+                    object? valRes = null;
+                    foreach (var typeitem in listType)
+                    {
+                        if (typeitem.IsClass && !typeitem.IsPrimitive && typeitem != typeof(string))
+                            continue;
+
+                        TypeConverter converter = TypeDescriptor.GetConverter(typeitem);
+                        Type valType = item.Value.GetType();
+                        valRes = converter.ConvertFrom(item.Value);
+                    }
+
+                    Expression rightValue = Expression.Constant(valRes, valRes.GetType());
+                    expOpr = SetExprOperator(item.Opr, body, rightValue);
+                    if (expOpr is null)
+                        throw new Exception("Invalid Logical Expression Operator");
+
+                    fieldFilter = Expression.Lambda<Func<T, bool>>(expOpr, param);
+                }
+                else
+                {
+                    PropertyInfo? pi = props.FirstOrDefault(a => a.Name.ToLower() == item.Field.ToLower());
+                    if (pi is null)
+                        throw new Exception($"Invalid filter field {item.Field}");
+
+                    body = Expression.PropertyOrField(body, pi.Name);
+                    TypeConverter converter = TypeDescriptor.GetConverter(pi.PropertyType);
+                    Type valType = item.Value.GetType();
+                    var valRes = converter.ConvertFrom(item.Value);
+                    Expression rightValue = Expression.Constant(valRes, pi.PropertyType);
+
+                    expOpr = SetExprOperator(item.Opr, body, rightValue);
+                    if (expOpr is null)
+                        throw new Exception("Invalid Logical Expression Operator");
+
+                    fieldFilter = Expression.Lambda<Func<T, bool>>(expOpr, param);
+                }
+
+                source = source.Where(fieldFilter);
+            }
+
+            return source;
+        }
+
+        private static List<FilterParam> SetListFilterQueryFieldAndValue(string data)
+        {
+            List<string> listFilter = data.Split(Constants.SEARCH_FIELD_SEPARATOR).ToList();
+            List<FilterParam> filterParam = new();
+
+            foreach (string item in listFilter)
+            {
+                FilterParam param = new();
+                if (item.Contains(Constants.OPR_EQUAL))
+                {
+                    int position = item.IndexOf(Constants.OPR_EQUAL);
+                    int position2 = item.IndexOf(Constants.OPR_GREATER);
+                    int position3 = item.IndexOf(Constants.OPR_LOWER);
+                    int position4 = item.IndexOf('!');
+
+                    if (position2 > 0) //Operasi GTE
+                    {
+                        param.Opr = Constants.OPR_GTE;
+                        param.Field = item[..position2];
+                        param.Value = item[(position + 1)..];
+                        filterParam.Add(param);
+                        continue;
+                    }
+
+                    if (position3 > 0) //Operasi LTE
+                    {
+                        param.Opr = Constants.OPR_LTE;
+                        param.Field = item[..position3];
+                        param.Value = item[(position + 1)..];
+                        filterParam.Add(param);
+                        continue;
+                    }
+
+                    if (position4 > 0) //Operasi NOE
+                    {
+                        param.Opr = Constants.OPR_NOT_EQUAL;
+                        param.Field = item[..position4];
+                        param.Value = item[(position + 1)..];
+                        filterParam.Add(param);
+                        continue;
+                    }
+
+                    param.Opr = Constants.OPR_EQUAL;
+                    param.Field = item[..position];
+                    param.Value = item[(position + 1)..];
+                    ValidationLogicOprValue(param.Opr, param.Value);
+                    filterParam.Add(param);
+                    continue;
+                }
+
+                if (item.Contains(Constants.OPR_GREATER))
+                {
+                    int position = item.IndexOf(Constants.OPR_GREATER);
+                    param.Opr = Constants.OPR_GREATER;
+                    param.Field = item[..position];
+                    param.Value = item[(position + 1)..];
+                    filterParam.Add(param);
+                    continue;
+                }
+
+                if (item.Contains(Constants.OPR_LOWER))
+                {
+                    int position = item.IndexOf(Constants.OPR_LOWER);
+                    param.Opr = Constants.OPR_LOWER;
+                    param.Field = item[..position];
+                    param.Value = item[(position + 1)..];
+                    filterParam.Add(param);
+                    continue;
+                }
+            }
+
+            return filterParam;
+        }
+
+        private static Expression? SetExprOperator(string opr, Expression body, Expression rightValue)
+        {
+            Expression? expOpr = opr switch
+            {
+                Constants.OPR_EQUAL => Expression.Equal(body, rightValue),
+                Constants.OPR_LTE => Expression.LessThanOrEqual(body, rightValue),
+                Constants.OPR_GTE => Expression.GreaterThanOrEqual(body, rightValue),
+                Constants.OPR_GREATER => Expression.GreaterThan(body, rightValue),
+                Constants.OPR_LOWER => Expression.LessThan(body, rightValue),
+                Constants.OPR_NOT_EQUAL => Expression.NotEqual(body, rightValue),
+                _ => null,
+            };
+            return expOpr;
+        }
+
+        private static void ValidationLogicOprValue(string opr, object value)
+        {
+            if (value.GetType() == typeof(string) &&
+                (opr == Constants.OPR_LOWER || opr == Constants.OPR_GTE || opr == Constants.OPR_GREATER
+                || opr == Constants.OPR_LTE))
+            {
+                throw new Exception($"Cannot Apply Logical '{opr}' On type string");
+            }
         }
     }
 }

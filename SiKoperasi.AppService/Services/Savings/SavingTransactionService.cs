@@ -26,8 +26,11 @@ namespace SiKoperasi.AppService.Services.Savings
             {
                 Amount = payload.Amount,
                 Notes = payload.Notes,
-                TrxDate = payload.TrDate,
-                TrxNo = masterSequenceService.GenerateNo("")
+                TrxValueDate = payload.TrValueDate,
+                TrxDate = DateTime.Now,
+                TrxType = payload.TrType,
+                TrxMethod = payload.TrMethod,
+                TrxNo = masterSequenceService.GenerateNo(SavingTransaction.SAVING_TRX_CODE)
             };
 
             saving.SavingTransactions.Add(savingTransaction);

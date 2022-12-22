@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Member;
 using SiKoperasi.Core.Common;

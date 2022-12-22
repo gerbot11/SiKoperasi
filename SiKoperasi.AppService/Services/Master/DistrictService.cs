@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.District;
@@ -14,26 +15,6 @@ namespace SiKoperasi.AppService.Services.Master
     {
         public DistrictService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
         {
-        }
-
-        public async Task CreateDistrictAsync(DistrictCreateDto dto)
-        {
-            await BaseCreateAsync(dto);
-        }
-
-        public async Task EditDistrictAsync(DistrictEditDto dto)
-        {
-            await BaseEditAsync(dto.Id, dto);
-        }
-
-        public async Task DeleteDistrictAsync(string id)
-        {
-            await BaseDeleteAsync(id);
-        }
-
-        public District GetDistrictModel(string id)
-        {
-            return BaseGetModelById(id);
         }
 
         public async Task<DistrictDto> GetDistrictAsync(string id)

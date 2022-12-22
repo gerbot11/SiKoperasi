@@ -53,6 +53,7 @@ namespace SiKoperasi.Web.Common
             service.AddAutoMapper(typeof(LoanAutoMapperConfig));
             service.AddAutoMapper(typeof(RefAutoMapperConfig));
             service.AddAutoMapper(typeof(MemberAutoMapperConfig));
+            service.AddAutoMapper(typeof(SavingAutoMapperConfig));
         }
 
         private static void AddGoogleAuth(IServiceCollection services)

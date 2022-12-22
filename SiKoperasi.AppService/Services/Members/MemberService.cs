@@ -48,7 +48,10 @@ namespace SiKoperasi.AppService.Services.Members
 
         public async Task DeleteMember(string id)
         {
-            await BaseDeleteAsync(id);
+            Member member = await BaseGetModelByIdAsync(id);
+            member.IsActive = false;
+            dbContext.Update(member);
+            await dbContext.SaveChangesAsync();
         }
 
         #region Abstract Implementation
@@ -56,8 +59,10 @@ namespace SiKoperasi.AppService.Services.Members
         {
             Member newMember = mapper.Map<Member>(payload);
             newMember.MemberNo = masterSequenceService.GenerateNo(Member.MEMBER_SEQ_CODE);
-            newMember.IsActive = false;
+            newMember.IsActive = true;
             newMember.Savings = savingService.CreateSaving();
+            newMember.Address = mapper.Map<Address>(payload.Address);
+            newMember.Job = mapper.Map<Job>(payload.Job);
             return newMember;
         }
 
@@ -75,18 +80,21 @@ namespace SiKoperasi.AppService.Services.Members
         {
             model.Name = payload.Name;
             model.IdNo = payload.IdNo;
-            model.IsActive = payload.IsActive;
             model.IdType = payload.IdType;
             model.Gender = payload.Gender;
             model.BirthDate = payload.BirthDate;
             model.BirthPlace = payload.BirthPlace;
             model.PhoneNumber = payload.PhoneNumber;
             model.NpwpNo = payload.NpwpNo;
+            model.Address = mapper.Map<Address>(payload.Address);
+            model.Job = mapper.Map<Job>(model.Job);
         }
 
         protected override IQueryable<Member> SetQueryable()
         {
-            return dbContext.Members;
+            return dbContext.Members.Where(a => a.IsActive)
+                .Include(a => a.Address)
+                .Include(a => a.Job);
         }
 
         protected override void ValidateCreate(Member model)

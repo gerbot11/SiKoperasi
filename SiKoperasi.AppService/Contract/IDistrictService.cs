@@ -7,11 +7,7 @@ namespace SiKoperasi.AppService.Contract
 {
     public interface IDistrictService
     {
-        Task CreateDistrictAsync(DistrictCreateDto dto);
-        Task DeleteDistrictAsync(string id);
-        Task EditDistrictAsync(DistrictEditDto dto);
         Task<DistrictDto> GetDistrictAsync(string id);
-        District GetDistrictModel(string id);
         Task<PagingModel<DistrictDto>> GetDistrictPagingAsync(QueryParamDto queryParam);
     }
 }

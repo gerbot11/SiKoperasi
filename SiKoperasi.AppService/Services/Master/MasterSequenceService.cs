@@ -25,6 +25,7 @@ namespace SiKoperasi.AppService.Services.Master
             if (dtNow.Month != ms.Month)
             {
                 ms.Month = dtNow.Month;
+                ms.SeqNo = 1;
             }
 
             if (ms.SeqNo <= 0)

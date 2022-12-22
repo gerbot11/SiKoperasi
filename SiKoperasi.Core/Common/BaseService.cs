@@ -21,10 +21,19 @@ namespace SiKoperasi.Core.Common
         {
             TModel? model = await GetAppDbSet().FindAsync(id);
             if (model is null)
-                throw new Exception("Data Not Found!");
+                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
 
             TResult result = MappingResultValue(model);
             return result;
+        }
+
+        protected virtual async Task<TModel> GetModelByIdAsync(string id)
+        {
+            TModel? model = await GetAppDbSet().FindAsync(id);
+            if (model is null)
+                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
+
+            return model;
         }
 
         protected virtual IEnumerable<TResult> GetResultsListAsync()

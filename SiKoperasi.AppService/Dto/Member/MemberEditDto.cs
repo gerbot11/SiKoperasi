@@ -12,6 +12,8 @@
         public DateTime RegistrationDate { get; set; }
         public string PhoneNumber { get; set; }
         public string? NpwpNo { get; set; }
-        public bool IsActive { get; set; }
+
+        public AddressEditDto Address { get; set; }
+        public JobEditDto Job { get; set; }
     }
 }

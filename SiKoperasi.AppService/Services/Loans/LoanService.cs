@@ -95,7 +95,7 @@ namespace SiKoperasi.AppService.Services.Loans
         #endregion
 
         #region Override Base Method
-        protected override async Task<PagingModel<LoanDto>> BaseGetPagingDataDtoAsync(IQueryParam queryParam)
+        protected override async Task<PagingModel<LoanDto>> BaseGetPagingDataDtoAsync(IQueryParam queryParam, IQueryable<Loan>? customquery = null)
         {
             IQueryable<LoanDto> query = from a in dbContext.Loans
                                         join b in dbContext.Members on a.MemberId equals b.Id

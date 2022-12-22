@@ -8,7 +8,6 @@ namespace SiKoperasi.DataAccess.Models.Members
     {
         public Member()
         {
-            Addresses = new HashSet<Address>();
             Savings = new HashSet<Saving>();
             MemberDocuments = new HashSet<MemberDocument>();
         }
@@ -28,7 +27,8 @@ namespace SiKoperasi.DataAccess.Models.Members
 
         public virtual Job Job { get; set; }
         public virtual Loan Loan { get; set; }
-        public ICollection<Address> Addresses { get; set; }
+        public virtual Address Address { get; set; }
+
         public ICollection<Saving> Savings { get; set; }
         public ICollection<MemberDocument> MemberDocuments { get; set; }
 

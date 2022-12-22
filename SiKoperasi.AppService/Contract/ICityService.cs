@@ -11,5 +11,6 @@ namespace SiKoperasi.AppService.Contract
         City GetCity(string id);
         Task<CityDto> GetCityAsync(string id);
         Task<PagingModel<CityDto>> GetCityPagingAsync(QueryParamDto queryParam);
+        Task<PagingModel<CityDto>> GetListCityByProvinceAsync(string provinceid, QueryParamDto queryParam);
     }
 }

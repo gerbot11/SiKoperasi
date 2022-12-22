@@ -36,6 +36,12 @@ namespace SiKoperasi.AppService.Services.Master
             return BaseGetModelById(id);
         }
 
+        public async Task<PagingModel<CityDto>> GetListCityByProvinceAsync(string provinceid, QueryParamDto queryParam)
+        {
+            IQueryable<City> query = dbContext.Cities.Where(a => a.ProvinceId == provinceid);
+            return await BaseGetPagingDataDtoAsync(queryParam, query);
+        }
+
         protected override City CreateNewModel(CityCreateDto payload)
         {
             City city = new()

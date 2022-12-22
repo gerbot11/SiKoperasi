@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Member;
 using SiKoperasi.AppService.Dto.Saving;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Members;
 using SiKoperasi.DataAccess.Models.Savings;
 
 namespace SiKoperasi.AppService.Services.Savings
 {
-    public class SavingService : BaseService<Saving, SavingDto, AppDbContext>, ISavingService
+    public class SavingService : BaseService<Saving, SavingMinimalDto, AppDbContext>, ISavingService
     {
         public SavingService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
         {
@@ -66,6 +68,21 @@ namespace SiKoperasi.AppService.Services.Savings
             return savingDto;
         }
 
+        public async Task<PagingModel<SavingMinimalDto>> GetSavingPagingAsync(QueryParamDto queryParam)
+        {
+            IQueryable<SavingMinimalDto> query = from a in dbContext.Members
+                                                 let b = dbContext.Savings.Where(x => x.MemberId == a.Id).Sum(x => x.TotalAmount - x.CutAmount)
+                                                 select new SavingMinimalDto
+                                                 {
+                                                     MemberId = a.Id,
+                                                     MemberName = a.Name,
+                                                     MemberNo = a.MemberNo,
+                                                     TotalSaving = b
+                                                 };
+
+            return await PagingModel<SavingMinimalDto>.CreateAsync(query, queryParam);
+        }
+
         private IEnumerable<RefSavingType> GetListRefSavingType()
         {
             return dbContext.RefSavingTypes.Where(a => a.IsActive == true);
@@ -78,7 +95,7 @@ namespace SiKoperasi.AppService.Services.Savings
 
         protected override string SetDefaultOrderField()
         {
-            return nameof(Saving.Member.Name);
+            return nameof(Saving.DtmCrt);
         }
 
         protected override IQueryable<Saving> SetQueryable()

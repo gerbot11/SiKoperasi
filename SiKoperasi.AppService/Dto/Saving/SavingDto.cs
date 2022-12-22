@@ -8,7 +8,5 @@ namespace SiKoperasi.AppService.Dto.Saving
         public decimal TotalAmount { get; set; }
         public decimal CutAmount { get; set; }
         public string SavingType { get; set; }
-
-        
     }
 }
