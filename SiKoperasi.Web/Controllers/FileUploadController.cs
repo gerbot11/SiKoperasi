@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
-using SiKoperasi.Web.Common;
 
 namespace SiKoperasi.Web.Controllers
 {
@@ -20,7 +20,7 @@ namespace SiKoperasi.Web.Controllers
         [HttpPost("[action]")]
         public async Task<FileUploadDto> UploadFile(IFormFile file, string folderId, string parentFolder)
         {
-            var fileUploaded = await fileUploadExtService.GoogleDriveUpload(BASE_LOAN_FOLDER_ID, BASE_LOAN_FOLDER_NAME ,folderId, file);
+            var fileUploaded = await fileUploadExtService.GoogleDriveUpload(BASE_LOAN_FOLDER_ID, folderId, file);
             FileUploadDto dto = new()
             {
                 FileName = file.FileName,

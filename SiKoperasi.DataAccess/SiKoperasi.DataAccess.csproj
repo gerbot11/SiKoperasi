@@ -23,8 +23,4 @@
     <ProjectReference Include="..\SiKoperasi.Core\SiKoperasi.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Commons\" />
-  </ItemGroup>
-
 </Project>

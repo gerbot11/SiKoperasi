@@ -11,6 +11,9 @@ namespace SiKoperasi.AppService.Util.AutoMapperConfig
             CreateMap<LoanCreateDto, Loan>().ReverseMap();
             CreateMap<LoanDto, Loan>().ReverseMap();
             CreateMap<InstSchdlDto, InstalmentSchedule>().ReverseMap();
+            CreateMap<InstSchdlMinimalDto, InstalmentSchedule>().ReverseMap();
+            CreateMap<LoanPaymentCreateDto, LoanPayment>().ReverseMap();
+            CreateMap<LoanPaymentDto, LoanPayment>().ReverseMap();
         }
     }
 }

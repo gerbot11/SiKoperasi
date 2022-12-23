@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SiKoperasi.Core.Data;
+using SiKoperasi.DataAccess.Models.Commons;
 using SiKoperasi.DataAccess.Models.Loans;
 using SiKoperasi.DataAccess.Models.MasterData;
 using SiKoperasi.DataAccess.Models.Members;
+using SiKoperasi.DataAccess.Models.Payments;
 using SiKoperasi.DataAccess.Models.Savings;
 
 namespace SiKoperasi.DataAccess.Dao
@@ -33,11 +35,24 @@ namespace SiKoperasi.DataAccess.Dao
         public virtual DbSet<InstalmentSchedule> InstalmentSchedules { get; set; }
         public virtual DbSet<LoanDocument> LoanDocuments { get; set; }
         public virtual DbSet<RefLoanDocument> RefLoanDocuments { get; set; }
+        public virtual DbSet<LoanPayment> LoanPayments { get; set; }
 
         //Savings
         public virtual DbSet<Saving> Savings { get; set; }
         public virtual DbSet<SavingTransaction> SavingTransactions { get; set; }
         public virtual DbSet<RefSavingType> RefSavingTypes { get; set; }
+
+        //Commons
+        public virtual DbSet<DriveFolderMap> DriveFolderMaps { get; set; }
+
+        //Payments
+        public virtual DbSet<PayHistH> PayHistHs { get; set; }
+        public virtual DbSet<PayHistD> PayHistDs { get; set; }
+
+        //Cash Bank
+        public virtual DbSet<CashBank> CashBanks { get; set; }
+        public virtual DbSet<CashBankAccount> CashBankAccounts { get; set; }
+        public virtual DbSet<CashBankTrx> CashBankTrxes { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

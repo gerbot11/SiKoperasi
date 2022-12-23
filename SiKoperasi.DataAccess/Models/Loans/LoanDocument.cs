@@ -1,4 +1,5 @@
 ﻿using SiKoperasi.Core.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace SiKoperasi.DataAccess.Models.Loans
 {

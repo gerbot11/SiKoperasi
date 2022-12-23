@@ -2,8 +2,6 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
-using SiKoperasi.Web.Common;
-using System.Net;
 
 namespace SiKoperasi.Web.Controllers
 {
@@ -12,15 +10,12 @@ namespace SiKoperasi.Web.Controllers
         private readonly ILoanService loanService;
         private readonly IInstalmentService instalmentService;
         private readonly FileUploadController fileUploadController;
-        private readonly IFileUploadExtService fileUploadExtService;
         
         public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, FileUploadController fileUploadController, IFileUploadExtService fileUploadExtService) : base(logger)
         {
             this.loanService = loanService;
             this.instalmentService = instalmentService;
             this.fileUploadController = fileUploadController;
-            this.fileUploadExtService = fileUploadExtService;
-            //this.httpClient = httpClient;
         }
 
         [HttpPost("[action]")]
@@ -63,27 +58,8 @@ namespace SiKoperasi.Web.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateLoanDocument([FromForm]LoanDocumentDto dto)
         {
-            await loanService.GetLoanAsync(dto.LoanId);
-            var uploadResult = await fileUploadController.UploadFile(dto.DocumentFiles, dto.LoanId);
-
-            return Ok(uploadResult);
-
-            //if (docid.Count != files.Count)
-            //    throw new Exception("Unmatch File And Doucment Reference!");
-
-            //List<LoanDocumentDto> dtos = new();
-            //for (int i = 0; i < files.Count; i++)
-            //{
-            //    LoanDocumentDto dto = new()
-            //    {
-            //        DocumentFiles = files[i],
-            //        RefLoanDocumentId = docid[i]
-            //    };
-
-            //    dtos.Add(dto);
-            //}
-
-            //await loanService.CreateLoanDocumentAsync(dtos, loanid);
+            await loanService.CreateLoanDocumentAsync(dto, dto.LoanId);
+            return Ok();
         }
 
         private string BaseUrl()

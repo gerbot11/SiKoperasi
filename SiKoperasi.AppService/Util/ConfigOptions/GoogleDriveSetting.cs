@@ -1,4 +1,4 @@
-﻿namespace SiKoperasi.Web.Common
+﻿namespace SiKoperasi.AppService.Util.ConfigOptions
 {
     public class GoogleDriveSetting
     {

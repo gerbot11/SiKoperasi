@@ -8,7 +8,7 @@ namespace SiKoperasi.AppService.Contract
     {
         Task<List<InstSchdlDto>> CalculateLoanInstSchdl(string loanid);
         Task<LoanDto> CreateLoanAsync(LoanCreateDto payload);
-        Task CreateLoanDocumentAsync(List<LoanDocumentDto> payload, string loanid);
+        Task CreateLoanDocumentAsync(LoanDocumentDto payload, string loanid);
         Task<LoanDto> GetLoanAsync(string id);
         Task<PagingModel<LoanDto>> GetLoanPagingAsync(QueryParamDto queryParam);
     }

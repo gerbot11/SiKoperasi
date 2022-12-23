@@ -9,9 +9,8 @@ namespace SiKoperasi.DataAccess.Models.Payments
         public int? InstSeqNo { get; set; }
         public decimal InAmount { get; set; }
         public decimal OutAmount { get; set; }
-        public string RefPaymentAllocId { get; set; }
+        public string? Descr { get; set; }
 
         public virtual PayHistH PayHistH { get; set; }
-        public virtual RefPaymentAlloc RefPaymentAlloc { get; set; }
     }
 }

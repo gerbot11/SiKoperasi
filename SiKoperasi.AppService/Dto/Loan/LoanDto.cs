@@ -1,6 +1,4 @@
-﻿using SiKoperasi.AppService.Dto.Member;
-
-namespace SiKoperasi.AppService.Dto.Loan
+﻿namespace SiKoperasi.AppService.Dto.Loan
 {
     public class LoanDto
     {

@@ -14,10 +14,17 @@ namespace SiKoperasi.AppService.Services.Loans
     {
         private readonly IMasterSequenceService masterSequenceService;
         private readonly IInstalmentService instalmentService;
-        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService) : base(dbContext, mapper)
+        private readonly IFileUploadExtService fileUploadExtService;
+        private readonly IRefService refService;
+
+        private const string LOAN_BASE_FOLDER = "LOAN";
+        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService, IFileUploadExtService fileUploadExtService, IRefService refService) 
+            : base(dbContext, mapper)
         {
             this.masterSequenceService = masterSequenceService;
             this.instalmentService = instalmentService;
+            this.fileUploadExtService = fileUploadExtService;
+            this.refService = refService;
         }
 
         public async Task<LoanDto> GetLoanAsync(string id)
@@ -55,24 +62,32 @@ namespace SiKoperasi.AppService.Services.Loans
             return mapper.Map<ICollection<InstalmentSchedule>, List<InstSchdlDto>>(loan.InstalmentSchedules);
         }
 
-        public async Task CreateLoanDocumentAsync(List<LoanDocumentDto> payload, string loanid)
+        public async Task CreateLoanDocumentAsync(LoanDocumentDto payload, string loanid)
         {
             Loan loan = await BaseGetModelByIdAsync(loanid);
-            
-            foreach (var item in payload)
+            LoanDocument loanDocument = new()
             {
-                LoanDocument loanDocument = new()
-                {
-                    FileName = item.DocumentFiles.FileName,
-                    FileExt = Path.GetExtension(item.DocumentFiles.FileName),
-                    RefLoanDocumentId = item.RefLoanDocumentId,
-                    FileSize = (int)item.DocumentFiles.Length,
-                    FileUrl = "No Available Yet"
-                };
+                FileName = payload.DocumentFiles.FileName,
+                FileExt = Path.GetExtension(payload.DocumentFiles.FileName),
+                RefLoanDocumentId = payload.RefLoanDocumentId,
+                FileSize = (int)payload.DocumentFiles.Length
+            };
 
-                await ValidateLoanDocument(loanDocument);
-                loan.LoanDocuments.Add(loanDocument);
+            await ValidateLoanDocument(loanDocument);
+            string parentFolderId;
+            var driveFolder = await refService.GetDriveByNameAsync(LOAN_BASE_FOLDER);
+            if (driveFolder is null)
+            {
+                parentFolderId = await fileUploadExtService.CreateParentFolder(LOAN_BASE_FOLDER);
+                await refService.CreateDriveFolderMapping(LOAN_BASE_FOLDER, parentFolderId);
             }
+            else
+            {
+                parentFolderId = driveFolder.FolderId;
+            }
+
+            loanDocument.FileUrl = await fileUploadExtService.GoogleDriveUpload(parentFolderId, loanid, payload.DocumentFiles);
+            loan.LoanDocuments.Add(loanDocument);
 
             dbContext.Loans.Update(loan);
             await dbContext.SaveChangesAsync();

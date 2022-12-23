@@ -4,10 +4,13 @@ using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Util.ConfigOptions;
 using static Google.Apis.Drive.v3.DriveService;
 
-namespace SiKoperasi.Web.Common
+namespace SiKoperasi.AppService.Services.Common
 {
     public class FileUploadExtService : IFileUploadExtService
     {
@@ -17,7 +20,7 @@ namespace SiKoperasi.Web.Common
             this.googleDriveSetting = googleDriveSetting.Value;
         }
 
-        public async Task<string> GoogleDriveUpload(string parentFolderId, string parentFolderName, string foldername, IFormFile file)
+        public async Task<string> GoogleDriveUpload(string parentFolderId, string foldername, IFormFile file)
         {
             string fileId;
             string? existFolder = await CheckExistFolder(foldername, parentFolderId);
@@ -32,6 +35,20 @@ namespace SiKoperasi.Web.Common
             }
 
             return fileId;
+        }
+
+        public async Task<string> CreateParentFolder(string folderName)
+        {
+            var service = GetService();
+            var driveFolder = new Google.Apis.Drive.v3.Data.File
+            {
+                Name = folderName,
+                MimeType = "application/vnd.google-apps.folder",
+            };
+
+            var command = service.Files.Create(driveFolder);
+            var file = await command.ExecuteAsync();
+            return file.Id;
         }
 
         private async Task<string> CreateFolder(string parent, string folderName)
@@ -91,31 +108,6 @@ namespace SiKoperasi.Web.Common
             } while (pageToken != null);
 
             return result.Select(a => a.Id).FirstOrDefault();
-        }
-
-        public bool GetFolder(string folder)
-        {
-            DriveService service = GetService();
-            var fileList = service.Files.List();
-            fileList.Q = $"mimeType='application/vnd.google-apps.folder' and name='{folder}'";
-            fileList.Fields = "nextPageToken, files(id, name)";
-            fileList.Spaces = "drive";
-
-            var result = new List<Google.Apis.Drive.v3.Data.File>();
-            string? pageToken = null;
-            do
-            {
-                
-                fileList.PageToken = pageToken;
-
-                var filesResult = fileList.Execute();
-                var files = filesResult.Files;
-
-                pageToken = filesResult.NextPageToken;
-                result.AddRange(files);
-            } while (pageToken != null);
-
-            return result.Any();
         }
 
         private DriveService GetService()

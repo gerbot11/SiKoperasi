@@ -8,7 +8,8 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public Loan() 
         {
             InstalmentSchedules = new HashSet<InstalmentSchedule>();
-            LoanDocuments= new HashSet<LoanDocument>();
+            LoanDocuments = new HashSet<LoanDocument>();
+            LoanPayments = new HashSet<LoanPayment>();
         }
 
         public string MemberId { get; set; }
@@ -27,6 +28,7 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public virtual LoanScheme LoanScheme { get; set; }
         public ICollection<InstalmentSchedule> InstalmentSchedules { get; set; }
         public ICollection<LoanDocument> LoanDocuments { get; set; }
+        public ICollection<LoanPayment> LoanPayments { get; set; }
 
         public const string LOAN_STATUS_NEW = "NEW";
         public const string LOAN_STATUS_ONCHECK = "CHK";

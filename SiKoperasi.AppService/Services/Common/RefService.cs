@@ -4,6 +4,7 @@ using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Loan;
 using SiKoperasi.Core.Common;
 using SiKoperasi.DataAccess.Dao;
+using SiKoperasi.DataAccess.Models.Commons;
 using SiKoperasi.DataAccess.Models.Loans;
 
 namespace SiKoperasi.AppService.Services.Common
@@ -12,6 +13,23 @@ namespace SiKoperasi.AppService.Services.Common
     {
         public RefService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
         {
+        }
+
+        public async Task<DriveFolderMap>? GetDriveByNameAsync(string name)
+        {
+            return await dbContext.DriveFolderMaps.FirstOrDefaultAsync(a => a.FolderName == name);
+        }
+
+        public async Task CreateDriveFolderMapping(string folderName, string folderId)
+        {
+            DriveFolderMap folderMap = new()
+            {
+                FolderName = folderName,
+                FolderId = folderId
+            };
+
+            dbContext.Add(folderMap);
+            await dbContext.SaveChangesAsync();
         }
 
         #region Ref Loan Doc

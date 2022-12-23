@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SiKoperasi.DataAccess.Dao;
 
@@ -11,9 +12,11 @@ using SiKoperasi.DataAccess.Dao;
 namespace SiKoperasi.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221223074859_migration13")]
+    partial class migration13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,56 +227,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasIndex("RefLoanDocumentId");
 
                     b.ToTable("LoanDocuments");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanPayment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InstSeqNo")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LoanId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Wop")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoanId");
-
-                    b.ToTable("LoanPayments");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanScheme", b =>
@@ -800,217 +753,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.ToTable("MembersDocument");
                 });
 
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBank", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("BeginBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CashBankAccountId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("EndBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("TrxDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CashBankAccountId");
-
-                    b.ToTable("CashBanks");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBankAccount", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AccountNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CashBankAccounts");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBankTrx", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CashBankId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("InAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OutAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("TrxDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CashBankId");
-
-                    b.ToTable("CashBankTrxes");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.PayHistD", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Descr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("InAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("InstSeqNo")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("OutAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PayHistHId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("PayHistSeqNo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PayHistHId");
-
-                    b.ToTable("PayHistDs");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.PayHistH", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("DtmCrt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DtmUpd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsReverse")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ReverseNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TrxCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TrxDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrxNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrCrt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsrUpd")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ValueDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PayHistHs");
-                });
-
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.RefSavingType", b =>
                 {
                     b.Property<string>("Id")
@@ -1196,17 +938,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("RefLoanDocument");
                 });
 
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.LoanPayment", b =>
-                {
-                    b.HasOne("SiKoperasi.DataAccess.Models.Loans.Loan", "Loan")
-                        .WithMany("LoanPayments")
-                        .HasForeignKey("LoanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Loan");
-                });
-
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.MasterData.City", b =>
                 {
                     b.HasOne("SiKoperasi.DataAccess.Models.MasterData.Province", "Province")
@@ -1305,39 +1036,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBank", b =>
-                {
-                    b.HasOne("SiKoperasi.DataAccess.Models.Payments.CashBankAccount", "CashBankAccount")
-                        .WithMany("CashBanks")
-                        .HasForeignKey("CashBankAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CashBankAccount");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBankTrx", b =>
-                {
-                    b.HasOne("SiKoperasi.DataAccess.Models.Payments.CashBank", "CashBank")
-                        .WithMany("CashBankTrxes")
-                        .HasForeignKey("CashBankId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CashBank");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.PayHistD", b =>
-                {
-                    b.HasOne("SiKoperasi.DataAccess.Models.Payments.PayHistH", "PayHistH")
-                        .WithMany("PayHistDs")
-                        .HasForeignKey("PayHistHId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PayHistH");
-                });
-
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.Saving", b =>
                 {
                     b.HasOne("SiKoperasi.DataAccess.Models.Members.Member", "Member")
@@ -1373,8 +1071,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("InstalmentSchedules");
 
                     b.Navigation("LoanDocuments");
-
-                    b.Navigation("LoanPayments");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.RefLoanDocument", b =>
@@ -1422,21 +1118,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("MemberDocuments");
 
                     b.Navigation("Savings");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBank", b =>
-                {
-                    b.Navigation("CashBankTrxes");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.CashBankAccount", b =>
-                {
-                    b.Navigation("CashBanks");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Payments.PayHistH", b =>
-                {
-                    b.Navigation("PayHistDs");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Savings.RefSavingType", b =>
