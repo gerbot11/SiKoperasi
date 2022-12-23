@@ -8,23 +8,32 @@ using SiKoperasi.AppService.Services.Master;
 using SiKoperasi.AppService.Services.Members;
 using SiKoperasi.AppService.Services.Savings;
 using SiKoperasi.AppService.Util.AutoMapperConfig;
+using SiKoperasi.Auth.Commons;
+using SiKoperasi.Auth.Models;
+using SiKoperasi.Auth.Services;
 using SiKoperasi.DataAccess.Dao;
 
 namespace SiKoperasi.Web.Common
 {
     public static class DependencyConfig
     {
-        public static void AddService(this IServiceCollection service, string? constring)
+        public static void AddService(this IServiceCollection service, ConfigurationManager configuration)
         {
             AddServiceScoped(service);
             AddAutoMapper(service);
             //AddGoogleAuth(service);
 
             service.AddSingleton<ProblemDetailsFactory, CommonProblemDetailsFactory>();
+            service.AddSingleton<IJwtTokenGeneratorService, JwtTokenGeneratorService>();
 
-            service.AddDbContext<AppDbContext>(op => op.UseSqlServer(constring));
+            service.AddDbContext<AppDbContext>(op => op.UseSqlServer(configuration.GetConnectionString("Assasins13")));
 
             service.AddTransient<IFileUploadExtService, FileUploadExtService>();
+
+            service.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SECTION_NAME));
+            service.Configure<GoogleDriveSetting>(configuration.GetSection(GoogleDriveSetting.SECTION_NAME));
+
+            service.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         }
 
         private static void AddServiceScoped(IServiceCollection service)
@@ -45,6 +54,8 @@ namespace SiKoperasi.Web.Common
             service.AddScoped<IInstalmentService, InstalmentService>();
 
             service.AddScoped<IRefService, RefService>();
+
+            service.AddScoped<ILoginService, LoginService>();
         }
 
         private static void AddAutoMapper(IServiceCollection service)

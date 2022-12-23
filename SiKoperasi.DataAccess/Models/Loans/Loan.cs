@@ -21,9 +21,10 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public string LoanSchemeId { get; set; }
         public decimal LoanAmount { get; set; }
         public string Status { get; set; }
+        //public string TypeOfPay { get; set; }
 
-        public Member Member { get; set; }
-        public LoanScheme LoanScheme { get; set; }
+        public virtual Member Member { get; set; }
+        public virtual LoanScheme LoanScheme { get; set; }
         public ICollection<InstalmentSchedule> InstalmentSchedules { get; set; }
         public ICollection<LoanDocument> LoanDocuments { get; set; }
 

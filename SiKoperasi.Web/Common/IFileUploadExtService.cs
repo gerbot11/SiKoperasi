@@ -2,6 +2,7 @@
 {
     public interface IFileUploadExtService
     {
-        string GoogleDriveUpload(string folder);
+        bool GetFolder(string folder);
+        Task<string> GoogleDriveUpload(string parentFolderId, string parentFolderName, string foldername, IFormFile file);
     }
 }

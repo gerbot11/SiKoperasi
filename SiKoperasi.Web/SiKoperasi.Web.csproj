@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SiKoperasi.AppService\SiKoperasi.AppService.csproj" />
+    <ProjectReference Include="..\SiKoperasi.Auth\SiKoperasi.Auth.csproj" />
     <ProjectReference Include="..\SiKoperasi.DataAccess\SiKoperasi.DataAccess.csproj" />
   </ItemGroup>
 

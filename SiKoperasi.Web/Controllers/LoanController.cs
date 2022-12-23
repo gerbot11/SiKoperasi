@@ -12,12 +12,14 @@ namespace SiKoperasi.Web.Controllers
         private readonly ILoanService loanService;
         private readonly IInstalmentService instalmentService;
         private readonly FileUploadController fileUploadController;
+        private readonly IFileUploadExtService fileUploadExtService;
         
-        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, FileUploadController fileUploadController) : base(logger)
+        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, FileUploadController fileUploadController, IFileUploadExtService fileUploadExtService) : base(logger)
         {
             this.loanService = loanService;
             this.instalmentService = instalmentService;
             this.fileUploadController = fileUploadController;
+            this.fileUploadExtService = fileUploadExtService;
             //this.httpClient = httpClient;
         }
 
@@ -59,50 +61,29 @@ namespace SiKoperasi.Web.Controllers
 
         //Loan Document
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateLoanDocument([FromForm] string loanid, [FromForm] List<string> docid, [FromForm] IFormFileCollection files)
+        public async Task<IActionResult> CreateLoanDocument([FromForm]LoanDocumentDto dto)
         {
-            //FileUploadExtService svc = new();
-            //svc.GoogleDriveUpload(dto);
-
-            //var content = new MultipartFormDataContent();
-            //foreach (var item in dto)
-            //{
-            //    content.Add(new StreamContent(item.OpenReadStream()), "FileData", item.FileName);
-            //}
-
-            //HttpClient httpClient = new()
-            //{
-            //    BaseAddress = new(BaseUrl())
-            //};
-
-            //HttpResponseMessage response = await httpClient.PostAsync("api/fileupload/UploadFile", content);
-            //if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            //{
-            //    return Ok();
-            //}
-
-            var uploadResult = await fileUploadController.UploadFile(files, loanid);
+            await loanService.GetLoanAsync(dto.LoanId);
+            var uploadResult = await fileUploadController.UploadFile(dto.DocumentFiles, dto.LoanId);
 
             return Ok(uploadResult);
 
-            if (docid.Count != files.Count)
-                throw new Exception("Unmatch File And Doucment Reference!");
+            //if (docid.Count != files.Count)
+            //    throw new Exception("Unmatch File And Doucment Reference!");
 
-            List<LoanDocumentDto> dtos = new();
-            for (int i = 0; i < files.Count; i++)
-            {
-                LoanDocumentDto dto = new()
-                {
-                    DocumentFiles = files[i],
-                    RefLoanDocumentId = docid[i]
-                };
+            //List<LoanDocumentDto> dtos = new();
+            //for (int i = 0; i < files.Count; i++)
+            //{
+            //    LoanDocumentDto dto = new()
+            //    {
+            //        DocumentFiles = files[i],
+            //        RefLoanDocumentId = docid[i]
+            //    };
 
-                dtos.Add(dto);
-            }
+            //    dtos.Add(dto);
+            //}
 
-            await loanService.CreateLoanDocumentAsync(dtos, loanid);
-
-            return Ok();
+            //await loanService.CreateLoanDocumentAsync(dtos, loanid);
         }
 
         private string BaseUrl()

@@ -10,7 +10,7 @@ builder.Services.AddControllers().AddControllersAsServices();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddService(builder.Configuration.GetConnectionString("Assasins13"));
+builder.Services.AddService(builder.Configuration);
 builder.Services.AddRouting(opt => opt.LowercaseUrls = true);
 
 var app = builder.Build();
