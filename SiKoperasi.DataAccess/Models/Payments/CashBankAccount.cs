@@ -14,6 +14,7 @@ namespace SiKoperasi.DataAccess.Models.Payments
         public decimal Balance { get; set; }
         public bool IsDefault { get; set;}
         public bool IsActive { get; set;}
+        public bool IsSavingDefault { get; set; }
 
         public ICollection<CashBank> CashBanks { get; set; }
     }

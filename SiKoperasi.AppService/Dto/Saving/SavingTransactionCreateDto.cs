@@ -3,10 +3,10 @@
     public class SavingTransactionCreateDto
     {
         public string SavingId { get; set; }
-        public DateTime TrValueDate { get; set; }
+        public DateTime TrxValueDate { get; set; }
         public decimal Amount { get; set; }
-        public string TrMethod { get; set; }
-        public char TrType { get; set; }
+        public string TrxMethod { get; set; }
+        public char TrxType { get; set; }
         public string? Notes { get; set; }
     }
 }

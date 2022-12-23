@@ -2,15 +2,18 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
+using SiKoperasi.AppService.Dto.Saving;
 
 namespace SiKoperasi.Web.Controllers
 {
     public class PaymentController : BaseController<PaymentController>
     {
         private readonly ILoanPaymentService loanPaymentService;
-        public PaymentController(ILogger<PaymentController> logger, ILoanPaymentService loanPaymentService) : base(logger)
+        private readonly ISavingTransactionService savingTransactionService;
+        public PaymentController(ILogger<PaymentController> logger, ILoanPaymentService loanPaymentService, ISavingTransactionService savingTransactionService) : base(logger)
         {
             this.loanPaymentService = loanPaymentService;
+            this.savingTransactionService = savingTransactionService;
         }
 
         [HttpGet("[action]")]
@@ -26,6 +29,14 @@ namespace SiKoperasi.Web.Controllers
         {
             LoggingPayload(dto);
             var data = await loanPaymentService.CreateLoanPaymentAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> SavingDeposit(SavingTransactionCreateDto dto)
+        {
+            LoggingPayload(dto);
+            var data = await savingTransactionService.CreateSavingTransactionAsync(dto);
             return Ok(data);
         }
     }

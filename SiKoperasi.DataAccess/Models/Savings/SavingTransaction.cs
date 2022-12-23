@@ -15,6 +15,6 @@ namespace SiKoperasi.DataAccess.Models.Savings
 
         public virtual Saving Saving { get; set; }
 
-        public const string SAVING_TRX_CODE = "SVX";
+        public const string SAVING_TRX_CODE = "SVT";
     }
 }

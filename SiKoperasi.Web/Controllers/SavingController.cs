@@ -7,9 +7,11 @@ namespace SiKoperasi.Web.Controllers
     public class SavingController : BaseController<SavingController>
     {
         private readonly ISavingService savingService;
-        public SavingController(ILogger<SavingController> logger, ISavingService savingService) : base(logger)
+        private readonly ISavingTransactionService savingTransactionService;
+        public SavingController(ILogger<SavingController> logger, ISavingService savingService, ISavingTransactionService savingTransactionService) : base(logger)
         {
             this.savingService = savingService;
+            this.savingTransactionService = savingTransactionService;
         }
 
         [HttpGet]
@@ -23,6 +25,13 @@ namespace SiKoperasi.Web.Controllers
         public async Task<IActionResult> GetMemberSavings(string memberid)
         {
             var data = await savingService.GetMemberSavingAsync(memberid);
+            return Ok(data);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSavingTransaction(string savingid, [FromQuery] QueryParamDto queryParam)
+        {
+            var data = await savingTransactionService.GetPagingModelAsync(queryParam, savingid);
             return Ok(data);
         }
     }

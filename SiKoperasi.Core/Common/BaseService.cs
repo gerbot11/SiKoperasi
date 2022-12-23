@@ -46,12 +46,13 @@ namespace SiKoperasi.Core.Common
             return result;
         }
 
-        protected virtual async Task<PagingModel<TResult>> GetPagingDataDtoAsync(IQueryParam queryParam)
+        protected virtual async Task<PagingModel<TResult>> GetPagingDataDtoAsync(IQueryParam queryParam, IQueryable<TModel>? customquery = null)
         {
             queryParam.OrderBy ??= SetDefaultOrderField();
             queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
+            customquery ??= SetQueryable();
 
-            return await PagingModel<TModel>.CreateDtoPagingAsync(SetQueryable(), queryParam, MappingResultValue);
+            return await PagingModel<TModel>.CreateDtoPagingAsync(customquery, queryParam, MappingResultValue);
         }
 
         private TResult MappingResultValue(TModel model)

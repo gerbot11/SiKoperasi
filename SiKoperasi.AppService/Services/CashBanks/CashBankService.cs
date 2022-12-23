@@ -33,8 +33,21 @@ namespace SiKoperasi.AppService.Services.CashBanks
 
         public async Task CreateCashBankTrxAsync(PayHistH payHistH, string bankAccId)
         {
-            CashBank? cashBank = dbContext.CashBanks.Where(a => a.CashBankAccountId == bankAccId && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
-            cashBank ??= await CreateCashBank(bankAccId);
+            CashBank? cashBank;
+            if (string.IsNullOrEmpty(bankAccId))
+            {
+                cashBank = dbContext.CashBanks.Where(a => a.CashBankAccount.IsSavingDefault && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
+                if (cashBank is null)
+                {
+                    string defaultSavingBankAccId = dbContext.CashBankAccounts.Where(a => a.IsSavingDefault).Single().Id;
+                    cashBank = await CreateCashBank(defaultSavingBankAccId);
+                }
+            }
+            else
+            {
+                cashBank = dbContext.CashBanks.Where(a => a.CashBankAccountId == bankAccId && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
+                cashBank ??= await CreateCashBank(bankAccId);
+            }
 
             CashBankTrx trx = new()
             {

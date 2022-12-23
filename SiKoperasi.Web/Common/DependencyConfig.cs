@@ -51,6 +51,7 @@ namespace SiKoperasi.Web.Common
             service.AddScoped<IMemberService, MemberService>();
 
             service.AddScoped<ISavingService, SavingService>();
+            service.AddScoped<ISavingTransactionService, SavingTransactionService>();
 
             service.AddScoped<ILoanService, LoanService>();
             service.AddScoped<IInstalmentService, InstalmentService>();
