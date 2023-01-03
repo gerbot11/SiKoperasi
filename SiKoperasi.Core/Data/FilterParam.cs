@@ -2,8 +2,8 @@
 {
     public class FilterParam
     {
-        public string Field { get; set; }
-        public string Opr { get; set; }
-        public object Value { get; set; }
+        public string Field { get; set; } = null!;
+        public string Opr { get; set; } = null!;
+        public object Value { get; set; } = null!;
     }
 }

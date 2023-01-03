@@ -10,6 +10,7 @@ namespace SiKoperasi.AppService.Contract
         Task<CashBankAccDto> CreateCashBankAccAsync(CashBankAccCreateDto payload);
         Task CreateCashBankTrxAsync(PayHistH payHistH, string bankAccId);
         Task<CashBankAccDto> EditCashBankAccAsync(CashBankAccDto payload);
+        Task<CashBankAccDto> GetCashBankByIdAsync(string id);
         Task<PagingModel<CashBankAccDto>> GetPagingModelAsync(QueryParamDto queryParam);
     }
 }

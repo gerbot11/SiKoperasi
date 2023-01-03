@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
 using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Commons;
 using SiKoperasi.DataAccess.Models.Loans;
+using System;
+using System.Linq.Expressions;
 
 namespace SiKoperasi.AppService.Services.Common
 {
@@ -15,7 +19,7 @@ namespace SiKoperasi.AppService.Services.Common
         {
         }
 
-        public async Task<DriveFolderMap>? GetDriveByNameAsync(string name)
+        public async Task<DriveFolderMap?> GetDriveByNameAsync(string name)
         {
             return await dbContext.DriveFolderMaps.FirstOrDefaultAsync(a => a.FolderName == name);
         }
@@ -44,6 +48,26 @@ namespace SiKoperasi.AppService.Services.Common
             await dbContext.SaveChangesAsync();
 
             return mapper.Map<RefLoanDocDto>(refLoanDocument);
+        }
+        #endregion
+
+        #region Ref Master
+        public async Task<List<string>> GetRefMasterValueByCodeAsync(string code)
+        {
+            string? value = await dbContext.RefMasters.Where(a => a.Code == code).Select(a => a.Value).FirstOrDefaultAsync();
+            if (string.IsNullOrEmpty(value))
+                throw new Exception($"No Ref Master Found with Code: {code}");
+
+            List<string> listValue = value.Split(';').ToList();
+            return listValue;
+        }
+
+        public async Task<PagingModel<RefMasterDto>> GetListRefMasterAsync(QueryParamDto queryParam)
+        {
+            var query = from a in dbContext.RefMasters
+                        select new RefMasterDto(a.Code, a.Name, a.Value.Split(';', StringSplitOptions.None));
+
+            return await PagingModel<RefMasterDto>.CreateAsync(query, queryParam);
         }
         #endregion
     }

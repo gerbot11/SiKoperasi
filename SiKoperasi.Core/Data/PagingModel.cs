@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Enums;
+using SiKoperasi.Core.Exceptions;
 using System.ComponentModel;
 using System.Data;
-using System.Globalization;
-using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
+using static SiKoperasi.Core.Common.Constants;
 
 namespace SiKoperasi.Core.Data
 {
@@ -105,7 +105,7 @@ namespace SiKoperasi.Core.Data
                 return source;
 
             List<PropertyInfo> props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(a => !a.Name.Contains("Id") && !a.Name.Contains("Usr")).ToList();
+                .Where(a => !a.Name.Contains("Usr")).ToList();
 
             ParameterExpression param = Expression.Parameter(typeof(T));
             Expression<Func<T, bool>> fieldFilter;
@@ -113,7 +113,7 @@ namespace SiKoperasi.Core.Data
             var filterParam = SetListFilterQueryFieldAndValue(queryParam.SearchFilter);
             if (!filterParam.Any())
             {
-                throw new Exception("Unable to process logical operator for filter!");
+                throw new InvalidLogicalOperationException();
             }
 
             foreach (var item in filterParam)
@@ -136,7 +136,7 @@ namespace SiKoperasi.Core.Data
                         {
                             PropertyInfo? pi = listType[i - 1].GetProperties().FirstOrDefault(a => a.Name.ToLower() == field.ToLower());
                             if (pi is null)
-                                throw new Exception($"Invalid filter field {field}");
+                                throw new InvalidFilterFieldException($"{field}");
 
                             listType.Add(pi.PropertyType);
                         }
@@ -144,7 +144,7 @@ namespace SiKoperasi.Core.Data
                         {
                             PropertyInfo? pi = props.FirstOrDefault(a => a.Name.ToLower() == field.ToLower());
                             if (pi is null)
-                                throw new Exception($"Invalid filter field {item.Field}");
+                                throw new InvalidFilterFieldException($"{item.Field}");
 
                             listType.Add(pi.PropertyType);
                         }
@@ -164,7 +164,7 @@ namespace SiKoperasi.Core.Data
                     Expression rightValue = Expression.Constant(valRes, valRes.GetType());
                     expOpr = SetExprOperator(item.Opr, body, rightValue);
                     if (expOpr is null)
-                        throw new Exception("Invalid Logical Expression Operator");
+                        throw new InvalidExpressionOprException($"{item.Opr}");
 
                     fieldFilter = Expression.Lambda<Func<T, bool>>(expOpr, param);
                 }
@@ -172,7 +172,7 @@ namespace SiKoperasi.Core.Data
                 {
                     PropertyInfo? pi = props.FirstOrDefault(a => a.Name.ToLower() == item.Field.ToLower());
                     if (pi is null)
-                        throw new Exception($"Invalid filter field {item.Field}");
+                        throw new InvalidFilterFieldException($"{item.Field}");
 
                     body = Expression.PropertyOrField(body, pi.Name);
                     TypeConverter converter = TypeDescriptor.GetConverter(pi.PropertyType);
@@ -182,7 +182,7 @@ namespace SiKoperasi.Core.Data
 
                     expOpr = SetExprOperator(item.Opr, body, rightValue);
                     if (expOpr is null)
-                        throw new Exception("Invalid Logical Expression Operator");
+                        throw new Exception($"{item.Opr}");
 
                     fieldFilter = Expression.Lambda<Func<T, bool>>(expOpr, param);
                 }
@@ -195,22 +195,22 @@ namespace SiKoperasi.Core.Data
 
         private static List<FilterParam> SetListFilterQueryFieldAndValue(string data)
         {
-            List<string> listFilter = data.Split(Constants.SEARCH_FIELD_SEPARATOR).ToList();
+            List<string> listFilter = data.Split(SEARCH_FIELD_SEPARATOR).ToList();
             List<FilterParam> filterParam = new();
 
             foreach (string item in listFilter)
             {
                 FilterParam param = new();
-                if (item.Contains(Constants.OPR_EQUAL))
+                if (item.Contains(OPR_EQUAL))
                 {
-                    int position = item.IndexOf(Constants.OPR_EQUAL);
-                    int position2 = item.IndexOf(Constants.OPR_GREATER);
-                    int position3 = item.IndexOf(Constants.OPR_LOWER);
+                    int position = item.IndexOf(OPR_EQUAL);
+                    int position2 = item.IndexOf(OPR_GREATER);
+                    int position3 = item.IndexOf(OPR_LOWER);
                     int position4 = item.IndexOf('!');
 
                     if (position2 > 0) //Operasi GTE
                     {
-                        param.Opr = Constants.OPR_GTE;
+                        param.Opr = OPR_GTE;
                         param.Field = item[..position2];
                         param.Value = item[(position + 1)..];
                         filterParam.Add(param);
@@ -219,7 +219,7 @@ namespace SiKoperasi.Core.Data
 
                     if (position3 > 0) //Operasi LTE
                     {
-                        param.Opr = Constants.OPR_LTE;
+                        param.Opr = OPR_LTE;
                         param.Field = item[..position3];
                         param.Value = item[(position + 1)..];
                         filterParam.Add(param);
@@ -228,14 +228,14 @@ namespace SiKoperasi.Core.Data
 
                     if (position4 > 0) //Operasi NOE
                     {
-                        param.Opr = Constants.OPR_NOT_EQUAL;
+                        param.Opr = OPR_NOT_EQUAL;
                         param.Field = item[..position4];
                         param.Value = item[(position + 1)..];
                         filterParam.Add(param);
                         continue;
                     }
 
-                    param.Opr = Constants.OPR_EQUAL;
+                    param.Opr = OPR_EQUAL;
                     param.Field = item[..position];
                     param.Value = item[(position + 1)..];
                     ValidationLogicOprValue(param.Opr, param.Value);
@@ -243,20 +243,20 @@ namespace SiKoperasi.Core.Data
                     continue;
                 }
 
-                if (item.Contains(Constants.OPR_GREATER))
+                if (item.Contains(OPR_GREATER))
                 {
-                    int position = item.IndexOf(Constants.OPR_GREATER);
-                    param.Opr = Constants.OPR_GREATER;
+                    int position = item.IndexOf(OPR_GREATER);
+                    param.Opr = OPR_GREATER;
                     param.Field = item[..position];
                     param.Value = item[(position + 1)..];
                     filterParam.Add(param);
                     continue;
                 }
 
-                if (item.Contains(Constants.OPR_LOWER))
+                if (item.Contains(OPR_LOWER))
                 {
-                    int position = item.IndexOf(Constants.OPR_LOWER);
-                    param.Opr = Constants.OPR_LOWER;
+                    int position = item.IndexOf(OPR_LOWER);
+                    param.Opr = OPR_LOWER;
                     param.Field = item[..position];
                     param.Value = item[(position + 1)..];
                     filterParam.Add(param);
@@ -271,12 +271,12 @@ namespace SiKoperasi.Core.Data
         {
             Expression? expOpr = opr switch
             {
-                Constants.OPR_EQUAL => Expression.Equal(body, rightValue),
-                Constants.OPR_LTE => Expression.LessThanOrEqual(body, rightValue),
-                Constants.OPR_GTE => Expression.GreaterThanOrEqual(body, rightValue),
-                Constants.OPR_GREATER => Expression.GreaterThan(body, rightValue),
-                Constants.OPR_LOWER => Expression.LessThan(body, rightValue),
-                Constants.OPR_NOT_EQUAL => Expression.NotEqual(body, rightValue),
+                OPR_EQUAL => Expression.Equal(body, rightValue),
+                OPR_LTE => Expression.LessThanOrEqual(body, rightValue),
+                OPR_GTE => Expression.GreaterThanOrEqual(body, rightValue),
+                OPR_GREATER => Expression.GreaterThan(body, rightValue),
+                OPR_LOWER => Expression.LessThan(body, rightValue),
+                OPR_NOT_EQUAL => Expression.NotEqual(body, rightValue),
                 _ => null,
             };
             return expOpr;
@@ -285,8 +285,8 @@ namespace SiKoperasi.Core.Data
         private static void ValidationLogicOprValue(string opr, object value)
         {
             if (value.GetType() == typeof(string) &&
-                (opr == Constants.OPR_LOWER || opr == Constants.OPR_GTE || opr == Constants.OPR_GREATER
-                || opr == Constants.OPR_LTE))
+                (opr == OPR_LOWER || opr == OPR_GTE || opr == OPR_GREATER
+                || opr == OPR_LTE))
             {
                 throw new Exception($"Cannot Apply Logical '{opr}' On type string");
             }

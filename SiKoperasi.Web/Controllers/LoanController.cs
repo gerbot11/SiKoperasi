@@ -9,18 +9,17 @@ namespace SiKoperasi.Web.Controllers
     {
         private readonly ILoanService loanService;
         private readonly IInstalmentService instalmentService;
-        private readonly FileUploadController fileUploadController;
         
-        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, FileUploadController fileUploadController, IFileUploadExtService fileUploadExtService) : base(logger)
+        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService) : base(logger)
         {
             this.loanService = loanService;
             this.instalmentService = instalmentService;
-            this.fileUploadController = fileUploadController;
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateNewLoan(LoanCreateDto dto)
         {
+            LoggingPayload(dto);
             var data = await loanService.CreateLoanAsync(dto);
             return Ok(data);
         }
@@ -39,11 +38,19 @@ namespace SiKoperasi.Web.Controllers
             return Ok(data);
         }
 
-        //Installment
-        [HttpPost("[action]/{loanid}")]
-        public async Task<IActionResult> CalculateInstalment(string loanid)
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetListLoanSchemes([FromQuery] QueryParamDto queryParam)
         {
-            var data = await loanService.CalculateLoanInstSchdl(loanid);
+            var data = await loanService.GetLoanSchemeListAsync(queryParam);
+            return Ok(data);
+        }
+
+        //Installment
+        [HttpGet("[action]")]
+        public IActionResult CalculateInstalment([FromQuery]InstSchdlCalculationDto dto)
+        {
+            LoggingPayload(dto);
+            var data = instalmentService.CalculateInstalmentSchdl(dto);
             return Ok(data);
         }
 
@@ -56,21 +63,30 @@ namespace SiKoperasi.Web.Controllers
 
         //Loan Document
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateLoanDocument([FromForm]LoanDocumentDto dto)
+        public async Task<IActionResult> CreateLoanDocument([FromForm] LoanDocumentDto dto)
         {
-            await loanService.CreateLoanDocumentAsync(dto, dto.LoanId);
+            LoggingPayload(dto);
+            if (!dto.DocumentFiles.Any())
+                return BadRequest("No File Provided!");
+
+            await loanService.CreateListLoanDocumentAsync(dto);
             return Ok();
         }
 
-        private string BaseUrl()
+        [HttpGet("[action]/{loanid}")]
+        public async Task<IActionResult> GetLoanDocument(string loanid)
         {
-            var uriBuilder = new UriBuilder(Request.Scheme, Request.Host.Host, Request.Host.Port ?? -1);
-            if (uriBuilder.Uri.IsDefaultPort)
-            {
-                uriBuilder.Port = -1;
-            }
+            var data = await loanService.GetLoanDocumentAsync(loanid);
+            return Ok(data);
+        }
 
-            return uriBuilder.Uri.AbsoluteUri;
+        //Loan Guarantee
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateLoanGuarantee([FromForm] LoanGuaranteeCreateDto dto)
+        {
+            LoggingPayload(dto);
+            await loanService.CreateLoanGuaranteAsync(dto);
+            return Ok();
         }
     }
 }

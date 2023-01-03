@@ -31,66 +31,67 @@ namespace SiKoperasi.AppService.Services.CashBanks
             return await BaseGetPagingDataDtoAsync(queryParam);
         }
 
+        public async Task<CashBankAccDto> GetCashBankByIdAsync(string id)
+        {
+            return await BaseGetByIdAsync(id);
+        }
+
         public async Task CreateCashBankTrxAsync(PayHistH payHistH, string bankAccId)
         {
-            CashBank? cashBank;
-            if (string.IsNullOrEmpty(bankAccId))
+            if (!await dbContext.CashBankAccounts.AnyAsync(a => a.Id == bankAccId))
+                throw new Exception("No Cash Bank Account was Found!");
+
+            CashBank? cashBank = dbContext.CashBanks.Where(a => a.CashBankAccountId == bankAccId && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
+            CashBankTrx trx = new()
             {
-                cashBank = dbContext.CashBanks.Where(a => a.CashBankAccount.IsSavingDefault && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
-                if (cashBank is null)
-                {
-                    string defaultSavingBankAccId = dbContext.CashBankAccounts.Where(a => a.IsSavingDefault).Single().Id;
-                    cashBank = await CreateCashBank(defaultSavingBankAccId);
-                }
+                InAmount = payHistH.PayHistDs.Sum(a => a.InAmount),
+                OutAmount = payHistH.PayHistDs.Sum(a => a.OutAmount),
+                TrxNo = payHistH.TrxNo,
+                Description = payHistH.PayHistDs.First().Descr
+            };
+
+            if (cashBank is null)
+            {
+                cashBank = CreateCashBank(bankAccId);
+                cashBank.CashBankTrxes.Add(trx);
+                dbContext.Add(cashBank);
             }
             else
             {
-                cashBank = dbContext.CashBanks.Where(a => a.CashBankAccountId == bankAccId && a.TrxDate == DateTime.Now.Date).FirstOrDefault();
-                cashBank ??= await CreateCashBank(bankAccId);
+                cashBank.EndBalance += trx.InAmount - trx.OutAmount;
+                cashBank.CashBankTrxes.Add(trx);
+                dbContext.Update(cashBank);
             }
 
-            CashBankTrx trx = new()
-            {
-                CashBank = cashBank,
-                InAmount = payHistH.PayHistDs.Sum(a => a.InAmount),
-                OutAmount = payHistH.PayHistDs.Sum(a => a.OutAmount),
-                TrxDate = cashBank.TrxDate
-            };
-
-            dbContext.Add(trx);
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task<CashBank> CreateCashBank(string bankAccId)
+        private CashBank CreateCashBank(string bankAccId)
         {
-            CashBank? prevTrx = dbContext.CashBanks.FirstOrDefault(a => a.TrxDate == DateTime.Now.Date.AddDays(-1));
+            CashBank? prevTrx = dbContext.CashBanks.OrderByDescending(a => a.TrxDate).FirstOrDefault(a => a.CashBankAccountId == bankAccId);
+            CashBank newCb;
             if (prevTrx is null)
             {
-                prevTrx = new()
+                newCb = new()
                 {
                     TrxDate= DateTime.Now.Date,
                     BeginBalance= 0,
                     EndBalance = 0,
                     CashBankAccountId = bankAccId
                 };
-
-                dbContext.Add(prevTrx);
-                await dbContext.SaveChangesAsync();
-                return prevTrx;
             }
             else
             {
-                CashBank newCashBank = new()
+                newCb = new()
                 {
                     TrxDate = DateTime.Now.Date,
                     BeginBalance = prevTrx.EndBalance,
                     EndBalance = prevTrx.EndBalance,
+                    CashBankAccountId = bankAccId
                 };
-
-                dbContext.Add(newCashBank);
-                await dbContext.SaveChangesAsync();
-                return newCashBank;
             }
+
+            return newCb;
         }
 
         protected override CashBankAccount CreateNewModel(CashBankAccCreateDto payload)
@@ -112,9 +113,9 @@ namespace SiKoperasi.AppService.Services.CashBanks
         {
             model.AccountNo = payload.AccountNo;
             model.BankName = payload.BankName;
-            model.IsActive = payload.IsActive;
             model.IsDefault = payload.IsDefault;
             model.Balance = payload.Balance;
+            model.IsSavingDefault = payload.IsSavingDefault;
         }
 
         protected override IQueryable<CashBankAccount> SetQueryable()
@@ -137,6 +138,11 @@ namespace SiKoperasi.AppService.Services.CashBanks
         {
             if (dbContext.CashBankAccounts.Any(a => a.AccountNo == model.AccountNo && a.Id != model.Id))
                 throw new Exception("Duplicate Account No");
+        }
+
+        protected override CashBankAccDto MappingToResultCrud(CashBankAccount model)
+        {
+            return base.MappingToResult(model);
         }
     }
 }

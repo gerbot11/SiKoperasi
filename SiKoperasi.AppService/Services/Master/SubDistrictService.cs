@@ -91,5 +91,10 @@ namespace SiKoperasi.AppService.Services.Master
             if (dbContext.SubDistricts.Any(a => a.Code == model.Code && a.Id != model.Id))
                 throw new Exception($"Sub District with Code {model.Code} already exist");
         }
+
+        protected override SubDistrictDto MappingToResultCrud(SubDistrict model)
+        {
+            return base.MappingToResult(model);
+        }
     }
 }

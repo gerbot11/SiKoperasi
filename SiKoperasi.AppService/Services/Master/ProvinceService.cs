@@ -86,7 +86,7 @@ namespace SiKoperasi.AppService.Services.Master
 
         protected override void ValidateDelete(Province model)
         {
-            
+
         }
 
         protected override void ValidateEdit(Province model)
@@ -100,6 +100,11 @@ namespace SiKoperasi.AppService.Services.Master
         protected override string SetDefaultOrderField()
         {
             return nameof(Province.Name);
+        }
+
+        protected override ProvinceDto MappingToResultCrud(Province model)
+        {
+            return base.MappingToResult(model);
         }
         #endregion
     }

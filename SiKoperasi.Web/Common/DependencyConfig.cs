@@ -8,12 +8,15 @@ using SiKoperasi.AppService.Services.Loans;
 using SiKoperasi.AppService.Services.Master;
 using SiKoperasi.AppService.Services.Members;
 using SiKoperasi.AppService.Services.Savings;
+using SiKoperasi.AppService.Services.Shu;
 using SiKoperasi.AppService.Util.AutoMapperConfig;
-using SiKoperasi.AppService.Util.ConfigOptions;
 using SiKoperasi.Auth.Commons;
 using SiKoperasi.Auth.Models;
 using SiKoperasi.Auth.Services;
 using SiKoperasi.DataAccess.Dao;
+using SiKoperasi.ExternalService.Contract;
+using SiKoperasi.ExternalService.Services;
+using SiKoperasi.ExternalService.Utilities;
 
 namespace SiKoperasi.Web.Common
 {
@@ -22,20 +25,11 @@ namespace SiKoperasi.Web.Common
         public static void AddService(this IServiceCollection service, ConfigurationManager configuration)
         {
             AddServiceScoped(service);
+            AddServiceTransient(service);
+            AddServiceSingleton(service);
             AddAutoMapper(service);
-            //AddGoogleAuth(service);
-
-            service.AddSingleton<ProblemDetailsFactory, CommonProblemDetailsFactory>();
-            service.AddSingleton<IJwtTokenGeneratorService, JwtTokenGeneratorService>();
-
-            service.AddDbContext<AppDbContext>(op => op.UseSqlServer(configuration.GetConnectionString("Assasins13")));
-
-            service.AddTransient<IFileUploadExtService, FileUploadExtService>();
-
-            service.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SECTION_NAME));
-            service.Configure<GoogleDriveSetting>(configuration.GetSection(GoogleDriveSetting.SECTION_NAME));
-
-            service.AddScoped<IPasswordHasher<User>, PasswordHasher>();
+            AddConfigureItem(service, configuration);
+            AddDbContext(service, configuration);
         }
 
         private static void AddServiceScoped(IServiceCollection service)
@@ -60,8 +54,28 @@ namespace SiKoperasi.Web.Common
             service.AddScoped<IRefService, RefService>();
 
             service.AddScoped<ILoginService, LoginService>();
+            service.AddScoped<IPasswordHasher<User>, PasswordHasher>();
 
             service.AddScoped<ICashBankService, CashBankService>();
+
+            service.AddScoped<IShuService, ShuService>();
+            service.AddScoped<IShuTrxService, ShuTrxService>();
+        }
+
+        private static void AddServiceTransient(IServiceCollection service)
+        {
+            service.AddTransient<IGoogleDriveService, GoogleDriveService>();
+        }
+
+        private static void AddServiceSingleton(IServiceCollection service)
+        {
+            service.AddSingleton<ProblemDetailsFactory, CommonProblemDetailsFactory>();
+            service.AddSingleton<IJwtTokenGeneratorService, JwtTokenGeneratorService>();
+        }
+
+        private static void AddDbContext(IServiceCollection service, ConfigurationManager configuration)
+        {
+            service.AddDbContext<AppDbContext>(op => op.UseSqlServer(configuration.GetConnectionString("Assasins13")));
         }
 
         private static void AddAutoMapper(IServiceCollection service)
@@ -71,6 +85,12 @@ namespace SiKoperasi.Web.Common
             service.AddAutoMapper(typeof(RefAutoMapperConfig));
             service.AddAutoMapper(typeof(MemberAutoMapperConfig));
             service.AddAutoMapper(typeof(SavingAutoMapperConfig));
+        }
+
+        private static void AddConfigureItem(IServiceCollection service, ConfigurationManager configuration)
+        {
+            service.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SECTION_NAME));
+            service.Configure<GoogleDriveSetting>(configuration.GetSection(GoogleDriveSetting.SECTION_NAME));
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿namespace SiKoperasi.AppService.Dto.Loan
 {
-    public class LoanToBePaidDto
+    public record LoanToBePaidDto
     {
-        public string LoanId { get; set; }
-        public string LoanNo { get; set; }
-        public string MemberName { get; set; }
-        public InstSchdlMinimalDto? InstSchdl { get; set; }
+        public string LoanId { get; init; } = null!;
+        public string LoanNo { get; init; } = null!;
+        public string MemberName { get; init; } = null!;
+        public int OverDueDays { get; init; }
+        public InstSchdlMinimalDto? InstSchdl { get; init; }
     }
 }

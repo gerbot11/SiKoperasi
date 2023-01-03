@@ -9,6 +9,6 @@ namespace SiKoperasi.AppService.Contract
         Task DeleteAddressAsync(string id);
         Task EditAddressAsync(AddressEditDto payload);
         Task<AddressDto> GetAddressAsync(string id);
-        Task<IEnumerable<AddressDto>> GetAddressDtoByMemberAsync(string memberId);
+        Task<AddressDto?> GetAddressDtoByMemberAsync(string memberId);
     }
 }

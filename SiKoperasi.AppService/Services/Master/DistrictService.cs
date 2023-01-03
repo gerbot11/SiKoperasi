@@ -38,6 +38,11 @@ namespace SiKoperasi.AppService.Services.Master
             return dbContext.Districts;
         }
 
+        protected override DistrictDto MappingToResultCrud(District model)
+        {
+            return base.MappingToResult(model);
+        }
+
         protected override string SetDefaultOrderField()
         {
             return nameof(District.Name);

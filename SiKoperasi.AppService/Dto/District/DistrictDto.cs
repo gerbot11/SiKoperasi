@@ -1,9 +1,24 @@
 ﻿namespace SiKoperasi.AppService.Dto.District
 {
-    public class DistrictDto
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Code { get; set; }
-    }
+    public record DistrictDto
+    (
+        string Id,
+        string Name,
+        string Code
+    );
+
+    public record DistrictCreateDto
+    (
+        string Name,
+        string Code,
+        string CityId
+    );
+
+    public record DistrictEditDto
+    (
+        string Id,
+        string Name,
+        string Code,
+        string CityId
+    );
 }

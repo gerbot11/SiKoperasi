@@ -7,22 +7,14 @@ namespace SiKoperasi.Core.Common
 {
     public class PredicateHelper<T>
     {
-        public static Expression<Func<T, bool>> SetPredicateExpression(PropertyInfo propertyInfo, object value)
-        {
-            Expression<Func<T, bool>> expression;
-            ParameterExpression param = Expression.Parameter(typeof(T));
-
-            
-
-            return null;
-        }
-
         public static List<Expression<Func<T, bool>>> SetListPredicateExpression(List<PropertyInfo> propertyInfos, string value)
         {
             List<Expression<Func<T, bool>>> expressions = new();
             ParameterExpression param = Expression.Parameter(typeof(T));
 
             MethodInfo? method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            if (method is null)
+                throw new Exception("Contains Method Not Exist");
 
             foreach (var item in propertyInfos)
             {

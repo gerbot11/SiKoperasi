@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
-using SiKoperasi.AppService.Dto.Province;
 
 namespace SiKoperasi.Web.Controllers
 {
@@ -27,27 +25,6 @@ namespace SiKoperasi.Web.Controllers
         {
             var result = await provinceService.GetProvinceAsync(id);
             return Ok(result);
-        }
-
-        [HttpPost("newprovince")]
-        public async Task<IActionResult> NewProvince(ProvinceCreateDto dto)
-        {
-            await provinceService.CreateProvinceAsync(dto);
-            return Ok(dto);
-        }
-
-        [HttpPut("editprovince")]
-        public async Task<IActionResult> EditProvince(ProvinceEditDto dto)
-        {
-            await provinceService.EditProvinceAsync(dto);
-            return Ok();
-        }
-
-        [HttpDelete("deleteprovince/{id}")]
-        public async Task<IActionResult> DeleteProvince(string id)
-        {
-            await provinceService.DeleteProvinceAsync(id);
-            return Ok();
         }
     }
 }

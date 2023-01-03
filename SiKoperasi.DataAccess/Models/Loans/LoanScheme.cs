@@ -8,5 +8,7 @@ namespace SiKoperasi.DataAccess.Models.Loans
         public decimal PlafondAmount { get; set; }
         public int DueNum { get; set; }
         public decimal Rate { get; set; }
+        //public decimal LateChargeRate { get; set; }
+        public bool IsUseGuarantee { get; set; }
     }
 }

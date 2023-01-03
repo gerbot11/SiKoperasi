@@ -1,6 +1,6 @@
 ﻿namespace SiKoperasi.AppService.Dto.Common
 {
-    public class FileUploadDto
+    public record FileUploadDto
     {
         public string FullPath { get; set; }
         public string FileName { get; set; }

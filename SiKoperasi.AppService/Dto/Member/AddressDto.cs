@@ -1,15 +1,46 @@
-﻿namespace SiKoperasi.AppService.Dto.Member
+﻿using SiKoperasi.AppService.Dto.City;
+using SiKoperasi.AppService.Dto.District;
+using SiKoperasi.AppService.Dto.Province;
+using SiKoperasi.AppService.Dto.SubDistrict;
+
+namespace SiKoperasi.AppService.Dto.Member
 {
-    public class AddressDto
-    {
-        public string MemberId { get; set; }
-        public string AddressType { get; set; }
-        public string Description { get; set; }
-        public string Rt { get; set; }
-        public string Rw { get; set; }
-        public string ProvinceId { get; set; }
-        public string CityId { get; set; }
-        public string DistrictId { get; set; }
-        public string SubDistrictId { get; set; }
-    }
+    public record AddressDto
+    (
+        string MemberId,
+        string AddressType,
+        string Description,
+        string Rt,
+        string Rw,
+        ProvinceDto Province,
+        CityDto City,
+        DistrictDto District,
+        SubDistrictDto SubDistrict
+    );
+
+    public record AddressCreateDto
+    (
+        string AddressType,
+        string Description,
+        string Rt,
+        string Rw,
+        string ProvinceId,
+        string CityId,
+        string DistrictId,
+        string SubDistrictId
+    );
+
+    public record AddressEditDto
+    (
+        string Id,
+        string MemberId,
+        string AddressType,
+        string Description,
+        string Rt,
+        string Rw,
+        string ProvinceId,
+        string CityId,
+        string DistrictId,
+        string SubDistrictId
+    );
 }

@@ -5,7 +5,8 @@ namespace SiKoperasi.AppService.Contract
 {
     public interface IInstalmentService
     {
-        List<InstalmentSchedule> CalculateInstalmentSchdl(Loan loan);
+        List<InstSchdlMinimalDto> CalculateInstalmentSchdl(InstSchdlCalculationDto dto);
+        List<InstalmentSchedule> CalculateInstalmentSchdl(int tenor, decimal loanAmount, DateTime effDate, LoanScheme loanScheme);
         Task<IEnumerable<InstSchdlDto>> GetLoanInstSchdlsAsync(string loanid);
     }
 }

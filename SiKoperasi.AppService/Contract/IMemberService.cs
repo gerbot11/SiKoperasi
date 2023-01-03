@@ -12,6 +12,6 @@ namespace SiKoperasi.AppService.Contract
         Task<MemberDto> EditMemberAsync(MemberEditDto payload);
         Task<MemberDto> GetMemberAsync(string id);
         Task<Member> GetMemberModelAsync(string id);
-        Task<PagingModel<MemberDto>> GetMemberPagingAsync(QueryParamDto queryParam);
+        Task<PagingModel<MemberMinimalDto>> GetMemberPagingAsync(QueryParamDto queryParam);
     }
 }

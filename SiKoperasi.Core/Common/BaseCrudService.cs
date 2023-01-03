@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.Core.Data;
+using SiKoperasi.Core.Exceptions;
+using System.Reflection;
 
 namespace SiKoperasi.Core.Common
 {
@@ -19,10 +21,19 @@ namespace SiKoperasi.Core.Common
             this.mapper = mapper;
         }
 
-        protected virtual async Task<TResult> BaseGetByIdAsync(string id)
+        protected virtual async Task<TResult> BaseGetByIdAsync(string id, bool hasIncluded = false)
         {
-            TModel? result = await BaseGetModelByIdAsync(id);
-            return MappingToResult(result);
+            if (!hasIncluded)
+            {
+                TModel? result = await BaseGetModelByIdAsync(id);
+                return MappingToResult(result);
+            }
+
+            TModel? resultIncluded = await SetQueryable().FirstOrDefaultAsync(a => a.Id == id);
+            if (resultIncluded is null)
+                throw new ModelNotFoundException($"{typeof(TModel).Name}");
+
+            return MappingToResult(resultIncluded);
         }
 
         protected virtual async Task<TModel> BaseGetModelByIdAsync(string id)
@@ -30,7 +41,7 @@ namespace SiKoperasi.Core.Common
             TModel? result = await GetAppDbSet().FindAsync(id);
 
             if (result is null)
-                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
+                throw new ModelNotFoundException($"{typeof(TModel).Name}");
 
             return result;
         }
@@ -40,7 +51,7 @@ namespace SiKoperasi.Core.Common
             TModel? result = GetAppDbSet().Find(id);
 
             if (result is null)
-                throw new Exception($"{typeof(TModel).Name} Data Not Found!");
+                throw new ModelNotFoundException($"{typeof(TModel).Name}");
 
             return result;
         }
@@ -63,6 +74,14 @@ namespace SiKoperasi.Core.Common
             return await PagingModel<TModel>.CreateDtoPagingAsync(customquery, queryParam, MappingToResult);
         }
 
+        protected virtual async Task<PagingModel<TCustomResult>> BaseGetPagingCustomResultAsync<TCustomResult>(IQueryParam queryParam, IQueryable<TCustomResult> customquery)
+            where TCustomResult : class
+        {
+            queryParam.OrderBehavior ??= Enums.OrderBehaviour.Asc;
+
+            return await PagingModel<TCustomResult>.CreateAsync(customquery, queryParam);
+        }
+
         protected virtual async Task<TResult> BaseCreateAsync(TPayload payload)
         {
             TModel model = CreateNewModel(payload);
@@ -70,7 +89,7 @@ namespace SiKoperasi.Core.Common
             dbContext.Add(model);
             await dbContext.SaveChangesAsync();
 
-            return MappingToResult(model);
+            return MappingToResultCrud(model);
         }
 
         protected virtual async Task<TResult> BaseEditAsync(string id, TPayloadEdit payload)
@@ -81,7 +100,7 @@ namespace SiKoperasi.Core.Common
             dbContext.Update(modeledit);
             await dbContext.SaveChangesAsync();
 
-            return MappingToResult(modeledit);
+            return MappingToResultCrud(modeledit);
         }
 
         protected virtual async Task BaseDeleteAsync(string id)
@@ -92,12 +111,31 @@ namespace SiKoperasi.Core.Common
             await dbContext.SaveChangesAsync();
         }
 
+        protected virtual async Task BaseSafeDeleteAsync(string id)
+        {
+            TModel model = await BaseGetModelByIdAsync(id);
+            SetSafeDeleteValue(model);
+            dbContext.Update(model);
+            await dbContext.SaveChangesAsync();
+        }
+
         protected virtual TResult MappingToResult(TModel model)
         {
             return mapper.Map<TResult>(model);
         }
 
+        protected virtual void SetSafeDeleteValue(TModel model)
+        {
+            Type objType = model.GetType();
+            PropertyInfo? propertyInfo = objType.GetProperty("IsActive");
+            if (propertyInfo is null)
+                throw new Exception("Invalid Property Info for Safe Delete");
+
+            propertyInfo.SetValue(model, false);
+        }
+
         protected abstract TModel CreateNewModel(TPayload payload);
+        protected abstract TResult MappingToResultCrud(TModel model);
         protected abstract DbSet<TModel> GetAppDbSet();
         protected abstract IQueryable<TModel> SetQueryable();
         protected abstract void ValidateDelete(TModel model);

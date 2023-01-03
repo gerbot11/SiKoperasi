@@ -1,10 +1,22 @@
 ﻿namespace SiKoperasi.AppService.Dto.City
 {
-    public class CityDto
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Code { get; set; }
-        public string ProvinceId { get; set; }
-    }
+    public record CityDto(
+        string Id,
+        string Name, 
+        string Code, 
+        string ProvinceId
+    );
+
+    public record CityCreateDto(
+        string Name, 
+        string Code, 
+        string ProvinceId
+    );
+
+    public record CityEditDto(
+        string Id,
+        string Name,
+        string Code,
+        string ProvinceId
+    );
 }

@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.City;
+using SiKoperasi.AppService.Dto.District;
 using SiKoperasi.AppService.Dto.Member;
+using SiKoperasi.AppService.Dto.Province;
+using SiKoperasi.AppService.Dto.SubDistrict;
 using SiKoperasi.Core.Common;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Members;
@@ -36,22 +40,20 @@ namespace SiKoperasi.AppService.Services.Members
             await BaseDeleteAsync(id);
         }
 
-        public async Task<IEnumerable<AddressDto>> GetAddressDtoByMemberAsync(string memberId)
+        public async Task<AddressDto?> GetAddressDtoByMemberAsync(string memberId)
         {
-            IEnumerable<AddressDto> result = await (from a in dbContext.Addresses
-                                                    where a.MemberId == memberId
-                                                    select new AddressDto
-                                                    {
-                                                        MemberId = a.MemberId,
-                                                        AddressType = a.AddressType,
-                                                        CityId = a.CityId,
-                                                        Description = a.Description,
-                                                        DistrictId = a.DistrictId,
-                                                        ProvinceId = a.ProvinceId,
-                                                        Rt = a.Rt,
-                                                        Rw = a.Rw,
-                                                        SubDistrictId = a.SubDistrictId
-                                                    }).ToListAsync();
+            AddressDto? result = await (from a in dbContext.Addresses
+                                        where a.MemberId == memberId
+                                        select new AddressDto(
+                                            a.MemberId,
+                                            a.AddressType,
+                                            a.Description,
+                                            a.Rt,
+                                            a.Rw,
+                                            mapper.Map<ProvinceDto>(a.Province),
+                                            mapper.Map<CityDto>(a.City),
+                                            mapper.Map<DistrictDto>(a.District),
+                                            mapper.Map<SubDistrictDto>(a.SubDistrict))).FirstOrDefaultAsync();
 
             return result;
         }
@@ -111,6 +113,11 @@ namespace SiKoperasi.AppService.Services.Members
         {
             if (!dbContext.Members.Any(a => a.Id == memberId))
                 throw new Exception($"Member with Id {memberId} not Exist For Adding Address");
+        }
+
+        protected override AddressDto MappingToResultCrud(Address model)
+        {
+            return base.MappingToResult(model);
         }
         #endregion
     }

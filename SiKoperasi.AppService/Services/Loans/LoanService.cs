@@ -3,10 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
+using SiKoperasi.AppService.Dto.Member;
+using SiKoperasi.AppService.Exceptions;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Loans;
+using SiKoperasi.ExternalService.Contract;
+using static SiKoperasi.AppService.Util.Constant;
 
 namespace SiKoperasi.AppService.Services.Loans
 {
@@ -14,22 +18,22 @@ namespace SiKoperasi.AppService.Services.Loans
     {
         private readonly IMasterSequenceService masterSequenceService;
         private readonly IInstalmentService instalmentService;
-        private readonly IFileUploadExtService fileUploadExtService;
+        private readonly IGoogleDriveService googleDriveService;
         private readonly IRefService refService;
 
         private const string LOAN_BASE_FOLDER = "LOAN";
-        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService, IFileUploadExtService fileUploadExtService, IRefService refService) 
+        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService, IGoogleDriveService googleDriveService, IRefService refService) 
             : base(dbContext, mapper)
         {
             this.masterSequenceService = masterSequenceService;
             this.instalmentService = instalmentService;
-            this.fileUploadExtService = fileUploadExtService;
             this.refService = refService;
+            this.googleDriveService = googleDriveService;
         }
 
         public async Task<LoanDto> GetLoanAsync(string id)
         {
-            return await BaseGetByIdAsync(id);
+            return await BaseGetByIdAsync(id, true);
         }
 
         public async Task<PagingModel<LoanDto>> GetLoanPagingAsync(QueryParamDto queryParam)
@@ -42,10 +46,88 @@ namespace SiKoperasi.AppService.Services.Loans
             return await BaseCreateAsync(payload);
         }
 
-        public async Task<List<InstSchdlDto>> CalculateLoanInstSchdl(string loanid)
+        #region Loan Document
+        public async Task CreateListLoanDocumentAsync(LoanDocumentDto payloads)
         {
-            Loan loan = BaseGetModelById(loanid);
-            List<InstalmentSchedule> oldInstSchdl = dbContext.InstalmentSchedules.Where(a => a.LoanId == loanid).ToList();
+            Loan loan = await BaseGetModelByIdAsync(payloads.LoanId);
+            foreach (var payload in payloads.DocumentFiles)
+            {
+                LoanDocument loanDocument = new()
+                {
+                    FileName = payload.DocumentFiles.FileName,
+                    FileExt = Path.GetExtension(payload.DocumentFiles.FileName),
+                    RefLoanDocumentId = payload.RefLoanDocumentId,
+                    FileSize = (int)payload.DocumentFiles.Length
+                };
+
+                await ValidateLoanDocument(loanDocument);
+                string parentFolderId = await CheckLoanParentFolderAsync();
+                loanDocument.FileUrl = await googleDriveService.GoogleDriveUploadFile(parentFolderId, loan.Id, payload.DocumentFiles);
+                loan.LoanDocuments.Add(loanDocument);
+            }
+
+            dbContext.Loans.Update(loan);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<LoanDocumentViewDto>> GetLoanDocumentAsync(string loanid)
+        {
+            var data = await (from a in dbContext.LoanDocuments
+                              join b in dbContext.RefLoanDocuments on a.RefLoanDocumentId equals b.Id
+                              where a.LoanId == loanid
+                              select new LoanDocumentViewDto
+                              {
+                                  Id = a.Id,
+                                  RefLoanDocumentName= b.DocumentName,
+                                  FilePreviewUrl = string.Format(GOOGLE_DRIVE_EMBEDED_PREFIX, a.FileUrl)
+                              }).ToListAsync();
+
+            return data;
+        }
+
+        //public async Task EditLoanDocumentAsync(string id)
+        #endregion
+
+        public async Task<PagingModel<LoanSchemeDto>> GetLoanSchemeListAsync(QueryParamDto queryParam)
+        {
+            IQueryable<LoanSchemeDto> query = dbContext.LoanSchemes.OrderBy(a => a.LoanSchemeName).Select(a => mapper.Map<LoanSchemeDto>(a));
+            return await BaseGetPagingCustomResultAsync(queryParam, query);
+        }
+
+        public async Task CreateLoanGuaranteAsync(LoanGuaranteeCreateDto payloads)
+        {
+            Loan loan = await BaseGetModelByIdAsync(payloads.LoanId);
+            List<string> listGuranteType = await refService.GetRefMasterValueByCodeAsync(REF_GURANTEE_TYPE_CODE);
+            
+            foreach (var payload in payloads.LoanGuaranteeFiles)
+            {
+                if (!listGuranteType.Contains(payload.GuaranteeType))
+                    throw new Exception($"Invalid Gurantee Type ({payload.GuaranteeType})");
+
+                LoanGuarantee loanGuarantee = new()
+                {
+                    Loan = loan,
+                    GuaranteeName = payload.GuaranteeName,
+                    GuaranteeType = payload.GuaranteeType,
+                    LetterDate = payload.LetterDate,
+                    LetterNo = payload.LetterNo,
+                    LetterExpDate = payload.LetterExpDate,
+                    OwnerName = payload.OwnerName
+                };
+
+                string parentFolderId = await CheckLoanParentFolderAsync();
+                loanGuarantee.FileUrl = await googleDriveService.GoogleDriveUploadFile(parentFolderId, loan.Id, payload.File);
+                loan.LoanGuarantees.Add(loanGuarantee);
+            }
+
+            dbContext.Loans.Update(loan);
+            await dbContext.SaveChangesAsync();
+        }
+
+        #region Private Method
+        private List<InstalmentSchedule> CalculateLoanInstSchdl(Loan loan)
+        {
+            List<InstalmentSchedule> oldInstSchdl = dbContext.InstalmentSchedules.Where(a => a.LoanId == loan.Id).ToList();
             if (oldInstSchdl.Any())
             {
                 for (int i = 0; i < oldInstSchdl.Count; i++)
@@ -53,47 +135,9 @@ namespace SiKoperasi.AppService.Services.Loans
             }
 
             loan.LoanScheme = dbContext.LoanSchemes.First(a => a.Id == loan.LoanSchemeId);
-            var listInstSchdl = instalmentService.CalculateInstalmentSchdl(loan);
-
-            loan.InstalmentSchedules = listInstSchdl;
-            dbContext.Loans.Update(loan);
-            await dbContext.SaveChangesAsync();
-
-            return mapper.Map<ICollection<InstalmentSchedule>, List<InstSchdlDto>>(loan.InstalmentSchedules);
+            return instalmentService.CalculateInstalmentSchdl(loan.LoanDueNum, loan.LoanAmount, loan.EffectiveDate, loan.LoanScheme);
         }
 
-        public async Task CreateLoanDocumentAsync(LoanDocumentDto payload, string loanid)
-        {
-            Loan loan = await BaseGetModelByIdAsync(loanid);
-            LoanDocument loanDocument = new()
-            {
-                FileName = payload.DocumentFiles.FileName,
-                FileExt = Path.GetExtension(payload.DocumentFiles.FileName),
-                RefLoanDocumentId = payload.RefLoanDocumentId,
-                FileSize = (int)payload.DocumentFiles.Length
-            };
-
-            await ValidateLoanDocument(loanDocument);
-            string parentFolderId;
-            var driveFolder = await refService.GetDriveByNameAsync(LOAN_BASE_FOLDER);
-            if (driveFolder is null)
-            {
-                parentFolderId = await fileUploadExtService.CreateParentFolder(LOAN_BASE_FOLDER);
-                await refService.CreateDriveFolderMapping(LOAN_BASE_FOLDER, parentFolderId);
-            }
-            else
-            {
-                parentFolderId = driveFolder.FolderId;
-            }
-
-            loanDocument.FileUrl = await fileUploadExtService.GoogleDriveUpload(parentFolderId, loanid, payload.DocumentFiles);
-            loan.LoanDocuments.Add(loanDocument);
-
-            dbContext.Loans.Update(loan);
-            await dbContext.SaveChangesAsync();
-        }
-
-        #region Private Method
         private async Task ValidateLoanDocument(LoanDocument model)
         {
             RefLoanDocument? docSetting = await dbContext.RefLoanDocuments.FindAsync(model.RefLoanDocumentId);
@@ -101,11 +145,29 @@ namespace SiKoperasi.AppService.Services.Loans
                 throw new Exception("Loan Document Setting is Not Found!");
 
             List<string> fileExtSetting = docSetting.AcceptedFileExt.Split(";").ToList();
-            if (!fileExtSetting.Contains(model.FileExt))
-                throw new Exception("Unmatch File Extension Setting with Uploaded File");
+            if (!fileExtSetting.Contains(model.FileExt.ToLower()))
+                throw new Exception("Unmatch File Extension Setting with Uploaded File", 
+                    new Exception($"Setting File is:[{docSetting.AcceptedFileExt}] | File Your Upload with Ext:[{model.FileExt}]"));
 
             if (model.FileSize > docSetting.MaxFileSize)
                 throw new Exception("Max File Size has been Exeed!");
+        }
+
+        private async Task<string> CheckLoanParentFolderAsync()
+        {
+            string parentFolderId;
+            DataAccess.Models.Commons.DriveFolderMap? driveFolder = await refService.GetDriveByNameAsync(LOAN_BASE_FOLDER);
+            if (driveFolder is null)
+            {
+                parentFolderId = await googleDriveService.GoogleDriveCreateParentFolder(LOAN_BASE_FOLDER);
+                await refService.CreateDriveFolderMapping(LOAN_BASE_FOLDER, parentFolderId);
+            }
+            else
+            {
+                parentFolderId = driveFolder.FolderId;
+            }
+
+            return parentFolderId;
         }
         #endregion
 
@@ -114,8 +176,8 @@ namespace SiKoperasi.AppService.Services.Loans
         {
             IQueryable<LoanDto> query = from a in dbContext.Loans
                                         join b in dbContext.Members on a.MemberId equals b.Id
-                                        let c = dbContext.Addresses.FirstOrDefault(a => a.AddressType.ToLower() == "legal" && a.MemberId == b.Id)
-                                        where a.Status == Loan.LOAN_STATUS_NEW || a.Status == Loan.LOAN_STATUS_RETURN
+                                        join d in dbContext.LoanSchemes on a.LoanSchemeId equals d.Id
+                                        where a.Status == LOAN_STATUS_NEW || a.Status == LOAN_STATUS_RETURN
                                         select new LoanDto
                                         {
                                             Id = a.Id,
@@ -123,13 +185,12 @@ namespace SiKoperasi.AppService.Services.Loans
                                             LoanAmount = a.LoanAmount,
                                             LoanDate = a.LoanDate,
                                             LoanNo = a.LoanNo,
-                                            LoanSchemeId = a.LoanSchemeId,
+                                            LoanDueNum = a.LoanDueNum,
                                             NextDueNum = a.NextDueNum,
-                                            MemberId = a.MemberId,
-                                            MemberName = b.Name,
-                                            MemberAddress = c.Description,
+                                            Member = mapper.Map<MemberMinimalDto>(b),
                                             EffectiveDate = a.EffectiveDate,
-                                            Status = a.Status
+                                            Status = a.Status,
+                                            LoanScheme = mapper.Map<LoanSchemeDto>(d)
                                         };
 
             if (string.IsNullOrEmpty(queryParam.OrderBy))
@@ -143,8 +204,9 @@ namespace SiKoperasi.AppService.Services.Loans
         protected override Loan CreateNewModel(LoanCreateDto payload)
         {
             Loan loan = mapper.Map<Loan>(payload);
-            loan.LoanNo = masterSequenceService.GenerateNo(Loan.LOAN_SEQ_CODE);
-            loan.Status = Loan.LOAN_STATUS_NEW;
+            loan.LoanNo = masterSequenceService.GenerateNo(LOAN_SEQ_CODE);
+            loan.Status = LOAN_STATUS_NEW;
+            loan.InstalmentSchedules = CalculateLoanInstSchdl(loan);
 
             return loan;
         }
@@ -156,20 +218,60 @@ namespace SiKoperasi.AppService.Services.Loans
 
         protected override string SetDefaultOrderField()
         {
-            return nameof(Loan.DtmUpd);
+            return nameof(Loan.LoanDate);
         }
 
         protected override void SetModelValue(Loan model, LoanEditDto payload)
         {
-            throw new NotImplementedException();
+            model.LoanDate = payload.LoanDate;
+            model.LoanDueNum = payload.LoanDueNum;
+            model.EffectiveDate = payload.EffectiveDate;
+            model.LoanPurpose = payload.LoanPurpose;
+            model.LoanSchemeId = payload.LoanSchemeId;
+            model.LoanAmount = payload.LoanAmount;
         }
 
         protected override IQueryable<Loan> SetQueryable()
         {
-            return dbContext.Loans;
+            return dbContext.Loans
+                .AsNoTracking()
+                .Include(a => a.Member)
+                .Include(a => a.LoanScheme);
         }
 
         protected override void ValidateCreate(Loan model)
+        {
+            LoanScheme? loanScheme = dbContext.LoanSchemes.FirstOrDefault(a => a.Id == model.LoanSchemeId);
+            if (loanScheme is null)
+                throw new Exception("Loan Scheme Not Exist");
+
+            if (model.LoanAmount > loanScheme.PlafondAmount)
+                throw new Exception($"Jumlah pinjaman melebihi Palfond : {loanScheme.PlafondAmount}");
+
+            if (model.LoanDueNum > loanScheme.DueNum)
+                throw new OverTenorException($"{loanScheme.DueNum}");
+
+            bool member = dbContext.Members.Any(a => a.Id == model.MemberId);
+            if (!member)
+                throw new Exception("Member Not Exist");
+
+            if (dbContext.Loans.Any(a => a.MemberId == model.MemberId && a.Status != LOAN_STATUS_EXPIRED))
+                throw new Exception("This Member Already have Active/On Process Loan Loan");
+
+            decimal totalSaving = dbContext.Members
+                .Where(a => a.Id == model.MemberId)
+                .Join(dbContext.Savings, a => a.Id, b => b.MemberId, (a, b) => new {totSave = b.TotalAmount})
+                .Sum(a => a.totSave);
+            if (totalSaving <= 0)
+                throw new Exception($"Simpanan Anggota sebesar {totalSaving}, Tidak dapat mengajukan pinjaman");
+        }
+
+        protected override void ValidateDelete(Loan model)
+        {
+            return;
+        }
+
+        protected override void ValidateEdit(Loan model)
         {
             LoanScheme? loanScheme = dbContext.LoanSchemes.FirstOrDefault(a => a.Id == model.LoanSchemeId);
             if (loanScheme is null)
@@ -186,14 +288,9 @@ namespace SiKoperasi.AppService.Services.Loans
                 throw new Exception("Member Not Exist");
         }
 
-        protected override void ValidateDelete(Loan model)
+        protected override LoanDto MappingToResultCrud(Loan model)
         {
-            return;
-        }
-
-        protected override void ValidateEdit(Loan model)
-        {
-            return;
+            return base.MappingToResult(model);
         }
         #endregion
     }

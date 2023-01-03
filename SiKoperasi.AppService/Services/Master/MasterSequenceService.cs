@@ -33,7 +33,8 @@ namespace SiKoperasi.AppService.Services.Master
                 ms.SeqNo = 1;
             }
 
-            string no = ms.Month + ms.Prefix + ms.Year + ms.SeqNo.ToString().PadLeft(ms.NumLength, '0');
+            string month = ms.Month.ToString().Length > 1 ? ms.Month.ToString() : "0" + ms.Month;
+            string no = month + ms.Prefix + ms.Year + ms.SeqNo.ToString().PadLeft(ms.NumLength, '0');
 
             ms.SeqNo += 1;
 

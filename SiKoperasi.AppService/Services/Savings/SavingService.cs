@@ -57,30 +57,52 @@ namespace SiKoperasi.AppService.Services.Savings
                                     CutAmount = a.CutAmount,
                                     SavingType = c.SavingName,
                                     TotalAmount = a.TotalAmount,
+                                    IsWithdrawal = c.IsWithdrawal
                                 }).ToListAsync();
 
-            MemberSavingDto savingDto = new()
-            {
-                Member = memberDto,
-                Savings = savings
-            };
-
+            MemberSavingDto savingDto = new(memberDto, savings);
             return savingDto;
         }
 
         public async Task<PagingModel<SavingMinimalDto>> GetSavingPagingAsync(QueryParamDto queryParam)
         {
+            queryParam.OrderBehavior ??= Core.Enums.OrderBehaviour.Asc;
+            queryParam.OrderBy ??= nameof(SavingMinimalDto.MemberName);
+
             IQueryable<SavingMinimalDto> query = from a in dbContext.Members
+                                                 where a.IsActive
                                                  let b = dbContext.Savings.Where(x => x.MemberId == a.Id).Sum(x => x.TotalAmount - x.CutAmount)
                                                  select new SavingMinimalDto
                                                  {
+                                                     EmployeeNo = a.EmployeeNo,
+                                                     MemberNo = a.MemberNo,
                                                      MemberId = a.Id,
                                                      MemberName = a.Name,
-                                                     MemberNo = a.MemberNo,
-                                                     TotalSaving = b
+                                                     TotalAmount = b
                                                  };
 
             return await PagingModel<SavingMinimalDto>.CreateAsync(query, queryParam);
+        }
+
+        public async Task<PagingModel<RefSavingTypeDto>> GetPagingSavingTypeAsync(QueryParamDto queryParam)
+        {
+            queryParam.OrderBehavior ??= Core.Enums.OrderBehaviour.Asc;
+            queryParam.OrderBy ??= nameof(RefSavingType.SavingName);
+
+            var query = from a in dbContext.RefSavingTypes
+                        where a.IsActive
+                        select new RefSavingTypeDto
+                        {
+                            SavingName = a.SavingName,
+                            MinimalAmountDeposit = a.MinimalAmountDeposit,
+                            CutAmount = a.CutAmount,
+                            IsMandatory = a.IsMandatory,
+                            IsActive = a.IsActive,
+                            SavingRate = a.SavingRate,
+                            IsWithdrawal = a.IsWithdrawal
+                        };
+
+            return await PagingModel<RefSavingTypeDto>.CreateAsync(query, queryParam);
         }
 
         private IEnumerable<RefSavingType> GetListRefSavingType()

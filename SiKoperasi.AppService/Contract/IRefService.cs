@@ -1,10 +1,7 @@
-﻿using SiKoperasi.AppService.Dto.Loan;
+﻿using SiKoperasi.AppService.Dto.Common;
+using SiKoperasi.AppService.Dto.Loan;
+using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Models.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SiKoperasi.AppService.Contract
 {
@@ -12,6 +9,8 @@ namespace SiKoperasi.AppService.Contract
     {
         Task CreateDriveFolderMapping(string folderName, string folderId);
         Task<RefLoanDocDto> CreateRefLoanDocAsync(RefLoanDocCreateDto payload);
-        Task<DriveFolderMap>? GetDriveByNameAsync(string name);
+        Task<DriveFolderMap?> GetDriveByNameAsync(string name);
+        Task<PagingModel<RefMasterDto>> GetListRefMasterAsync(QueryParamDto queryParam);
+        Task<List<string>> GetRefMasterValueByCodeAsync(string code);
     }
 }

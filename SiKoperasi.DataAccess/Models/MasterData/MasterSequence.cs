@@ -4,13 +4,13 @@ namespace SiKoperasi.DataAccess.Models.MasterData
 {
     public class MasterSequence : BaseModel
     {
-        public string MasterSeqCode { get; set; }
-        public string MasterSeqName { get; set; }
+        public string MasterSeqCode { get; set; } = null!;
+        public string MasterSeqName { get; set; } = null!;
         public int SeqNo { get; set; }
-        public string Prefix { get; set; }
-        public string Sufix { get; set; }
+        public string Prefix { get; set; } = null!;
+        public string Sufix { get; set; } = null!;
         public int NumLength { get; set; }
-        public string RessetFlag { get; set; }
+        public string RessetFlag { get; set; } = null!;
         public int Year { get; set; }
         public int Month { get; set; }
 

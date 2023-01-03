@@ -91,5 +91,10 @@ namespace SiKoperasi.AppService.Services.Master
         {
             return nameof(City.Name);
         }
+
+        protected override CityDto MappingToResultCrud(City model)
+        {
+            return base.MappingToResult(model);
+        }
     }
 }

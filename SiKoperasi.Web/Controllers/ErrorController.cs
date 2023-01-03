@@ -15,7 +15,7 @@ namespace SiKoperasi.Web.Controllers
                 return NoContent();
 
             string title = exception.Message;
-            string innerMsg = exception.InnerException != null ? exception.InnerException.Message : exception.Message;
+            string innerMsg = exception.InnerException != null ? exception.InnerException.Message : string.Empty;
 
             return Problem(title:title, detail:innerMsg);
         }

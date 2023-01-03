@@ -1,11 +1,28 @@
 ﻿namespace SiKoperasi.AppService.Dto.SubDistrict
 {
-    public class SubDistrictDto
+    public record SubDistrictDto
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Code { get; set; }
-        public string PostalCode { get; set; }
-        public string DistrictId { get; set; }
+        public string Id { get; init; } = null!;
+        public string Name { get; init; } = null!;
+        public string Code { get; init; } = null!;
+        public string PostalCode { get; init; } = null!;
+        public string DistrictId { get; init; } = null!;
+    }
+
+    public record SubDistrictCreateDto
+    {
+        public string Name { get; init; } = null!;
+        public string Code { get; init; } = null!;
+        public string PostalCode { get; init; } = null!;
+        public string DistrictId { get; init; } = null!; 
+    }
+
+    public record SubDistrictEditDto
+    {
+        public string Id { get; init; } = null!;
+        public string Name { get; init; } = null!;
+        public string Code { get; init; } = null!;
+        public string PostalCode { get; init; } = null!;
+        public string DistrictId { get; init; } = null!; 
     }
 }

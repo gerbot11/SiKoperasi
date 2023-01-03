@@ -7,6 +7,7 @@ using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Members;
+using static SiKoperasi.AppService.Util.Constant;
 
 namespace SiKoperasi.AppService.Services.Members
 {
@@ -28,7 +29,7 @@ namespace SiKoperasi.AppService.Services.Members
 
         public async Task<MemberDto> GetMemberAsync(string id)
         {
-            return await BaseGetByIdAsync(id);
+            return await BaseGetByIdAsync(id, true);
         }
 
         public async Task<Member> GetMemberModelAsync(string id)
@@ -36,9 +37,22 @@ namespace SiKoperasi.AppService.Services.Members
             return await BaseGetModelByIdAsync(id);
         }
 
-        public async Task<PagingModel<MemberDto>> GetMemberPagingAsync(QueryParamDto queryParam)
+        public async Task<PagingModel<MemberMinimalDto>> GetMemberPagingAsync(QueryParamDto queryParam)
         {
-            return await BaseGetPagingDataDtoAsync(queryParam);
+            IQueryable<MemberMinimalDto> query = from a in GetAppDbSet()
+                                                 where a.IsActive
+                                                 select new MemberMinimalDto
+                                                 {
+                                                     Id = a.Id,
+                                                     MemberNo = a.MemberNo,
+                                                     Name = a.Name,
+                                                     IdNo = a.IdNo,
+                                                     IdType = a.IdType,
+                                                     PhoneNumber = a.PhoneNumber,
+                                                     EmployeeNo = a.EmployeeNo
+                                                 };
+
+            return await BaseGetPagingCustomResultAsync<MemberMinimalDto>(queryParam, query);
         }
 
         public async Task<MemberDto> EditMemberAsync(MemberEditDto payload)
@@ -48,18 +62,16 @@ namespace SiKoperasi.AppService.Services.Members
 
         public async Task DeleteMember(string id)
         {
-            Member member = await BaseGetModelByIdAsync(id);
-            member.IsActive = false;
-            dbContext.Update(member);
-            await dbContext.SaveChangesAsync();
+            await BaseSafeDeleteAsync(id);
         }
 
         #region Abstract Implementation
         protected override Member CreateNewModel(MemberCreateDto payload)
         {
             Member newMember = mapper.Map<Member>(payload);
-            newMember.MemberNo = masterSequenceService.GenerateNo(Member.MEMBER_SEQ_CODE);
+            newMember.MemberNo = masterSequenceService.GenerateNo(MEMBER_SEQ_CODE);
             newMember.IsActive = true;
+            newMember.RegistrationDate = DateTime.Now.Date;
             newMember.Savings = savingService.CreateSaving();
             newMember.Address = mapper.Map<Address>(payload.Address);
             newMember.Job = mapper.Map<Job>(payload.Job);
@@ -86,15 +98,53 @@ namespace SiKoperasi.AppService.Services.Members
             model.BirthPlace = payload.BirthPlace;
             model.PhoneNumber = payload.PhoneNumber;
             model.NpwpNo = payload.NpwpNo;
-            model.Address = mapper.Map<Address>(payload.Address);
-            model.Job = mapper.Map<Job>(model.Job);
+
+            model.Address = dbContext.Addresses.Single(a => a.MemberId == model.Id);
+            model.Address.Description = payload.Address.Description;
+            model.Address.AddressType = payload.Address.AddressType;
+            model.Address.Rt = payload.Address.Rt;
+            model.Address.Rw = payload.Address.Rw;
+            model.Address.ProvinceId = payload.Address.ProvinceId;
+            model.Address.CityId = payload.Address.CityId;
+            model.Address.DistrictId = payload.Address.DistrictId;
+            model.Address.SubDistrictId = payload.Address.SubDistrictId;
+
+            model.Job = dbContext.Jobs.Single(a => a.MemberId == model.Id);
+            model.Job.Company = payload.Job.Company;
+            model.Job.JobName = payload.Job.JobName;
+            model.Job.JobPosition = payload.Job.JobPosition;
+            model.Job.JobDescription = payload.Job.JobDescription;
+            model.Job.JobDepartment = payload.Job.JobDepartment;
+            model.Job.StartDate = payload.Job.StartDate;
         }
 
         protected override IQueryable<Member> SetQueryable()
         {
             return dbContext.Members.Where(a => a.IsActive)
-                .Include(a => a.Address)
-                .Include(a => a.Job);
+                .AsNoTracking()
+                .Include(a => a.Job)
+                .Select(a => new Member
+                {
+                    Id = a.Id,
+                    BirthDate = a.BirthDate,
+                    BirthPlace = a.BirthPlace,
+                    EmployeeNo = a.EmployeeNo,
+                    MemberNo = a.MemberNo,
+                    Gender = a.Gender,
+                    IdNo = a.IdNo,
+                    IdType = a.IdType,
+                    MartialStat = a.MartialStat,
+                    NpwpNo = a.NpwpNo,
+                    Name = a.Name,
+                    RegistrationDate = a.RegistrationDate,
+                    PhoneNumber = a.PhoneNumber,
+                    Address = dbContext.Addresses.Where(x => x.MemberId == a.Id)
+                                .Include(a => a.Province)
+                                .Include(a => a.City)
+                                .Include(a => a.District)
+                                .Include(a => a.SubDistrict).Single(),
+                    Job = a.Job,
+                });
         }
 
         protected override void ValidateCreate(Member model)
@@ -107,15 +157,24 @@ namespace SiKoperasi.AppService.Services.Members
 
         protected override void ValidateDelete(Member model)
         {
-            throw new Exception("Ga Bisa Hapus Member Bang, Banyak Relasi! (set inactive aja)");
+            return;
         }
 
         protected override void ValidateEdit(Member model)
         {
-            if (dbContext.Members.Any(a => a.IdNo == model.IdNo))
+            if (dbContext.Members.Any(a => a.IdNo == model.IdNo && a.Id != model.Id))
             {
                 throw new Exception($"Duplicate Member with ID No '{model.IdNo}'");
             }
+        }
+
+        protected override MemberDto MappingToResultCrud(Member model)
+        {
+            model.Address.City = dbContext.Cities.Single(a => a.Id == model.Address.CityId);
+            model.Address.Province = dbContext.Provinces.Single(a => a.Id == model.Address.ProvinceId);
+            model.Address.District = dbContext.Districts.Single(a => a.Id == model.Address.DistrictId);
+            model.Address.SubDistrict = dbContext.SubDistricts.Single(a => a.Id == model.Address.SubDistrictId);
+            return MappingToResult(model);
         }
         #endregion
     }

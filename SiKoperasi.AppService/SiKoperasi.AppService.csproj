@@ -16,6 +16,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SiKoperasi.Core\SiKoperasi.Core.csproj" />
     <ProjectReference Include="..\SiKoperasi.DataAccess\SiKoperasi.DataAccess.csproj" />
+    <ProjectReference Include="..\SiKoperasi.ExternalService\SiKoperasi.ExternalService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Util\ConfigOptions\" />
   </ItemGroup>
 
 </Project>

@@ -10,11 +10,13 @@ namespace SiKoperasi.AppService.Util.AutoMapperConfig
         {
             CreateMap<MemberDto, Member>().ReverseMap();
             CreateMap<MemberCreateDto, Member>().ReverseMap();
+            CreateMap<MemberMinimalDto, Member>().ReverseMap();
 
             CreateMap<JobCreateDto, Job>().ReverseMap();
             CreateMap<JobDto, Job>().ReverseMap();
 
             CreateMap<AddressCreateDto, Address>().ReverseMap();
+            CreateMap<AddressEditDto, Address>().ReverseMap();
             CreateMap<AddressDto, Address>().ReverseMap();
         }
     }

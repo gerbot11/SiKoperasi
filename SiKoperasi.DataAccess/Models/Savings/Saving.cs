@@ -10,13 +10,14 @@ namespace SiKoperasi.DataAccess.Models.Savings
             SavingTransactions = new HashSet<SavingTransaction>();
         }
 
-        public string MemberId { get; set; }
+        public string MemberId { get; set; } = null!;
         public decimal TotalAmount { get; set; }
         public decimal CutAmount { get; set; }
-        public string RefSavingTypeId { get; set; }
+        public string RefSavingTypeId { get; set; } = null!;
+        public decimal MonthlyDepositAmount { get; set; }
 
-        public virtual Member Member { get; set; }
-        public virtual RefSavingType RefSavingType { get; set; }
+        public virtual Member Member { get; set; } = null!;
+        public virtual RefSavingType RefSavingType { get; set; } = null!;
         public ICollection<SavingTransaction> SavingTransactions { get; set; }
     }
 }

@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SiKoperasi.DataAccess", "Si
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SiKoperasi.AppService", "SiKoperasi.AppService\SiKoperasi.AppService.csproj", "{41587EA1-C27E-4436-800D-2AA27557ADE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiKoperasi.Auth", "SiKoperasi.Auth\SiKoperasi.Auth.csproj", "{5E419076-BC78-4720-B028-941A3E213B11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SiKoperasi.Auth", "SiKoperasi.Auth\SiKoperasi.Auth.csproj", "{5E419076-BC78-4720-B028-941A3E213B11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiKoperasi.ExternalService", "SiKoperasi.ExternalService\SiKoperasi.ExternalService.csproj", "{80E4EE9E-48F8-4B6C-8E5B-7D544393A633}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{5E419076-BC78-4720-B028-941A3E213B11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E419076-BC78-4720-B028-941A3E213B11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E419076-BC78-4720-B028-941A3E213B11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80E4EE9E-48F8-4B6C-8E5B-7D544393A633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80E4EE9E-48F8-4B6C-8E5B-7D544393A633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80E4EE9E-48F8-4B6C-8E5B-7D544393A633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80E4EE9E-48F8-4B6C-8E5B-7D544393A633}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

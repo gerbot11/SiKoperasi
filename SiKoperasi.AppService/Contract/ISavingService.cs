@@ -10,6 +10,7 @@ namespace SiKoperasi.AppService.Contract
     {
         List<Saving> CreateSaving();
         Task<MemberSavingDto> GetMemberSavingAsync(string memberid);
+        Task<PagingModel<RefSavingTypeDto>> GetPagingSavingTypeAsync(QueryParamDto queryParam);
         Task<PagingModel<SavingMinimalDto>> GetSavingPagingAsync(QueryParamDto queryParam);
     }
 }

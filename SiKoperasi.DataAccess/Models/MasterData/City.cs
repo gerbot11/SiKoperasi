@@ -5,11 +5,11 @@ namespace SiKoperasi.DataAccess.Models.MasterData
 {
     public class City : BaseModel
     {
-        public string Name { get; set; }
-        public string Code { get; set; }
-        public string ProvinceId { get; set; }
+        public string Name { get; set; } = null!;
+        public string Code { get; set; } = null!;
+        public string ProvinceId { get; set; } = null!;
 
-        public virtual Province Province { get; set; }
+        public virtual Province Province { get; set; } = null!;
         public ICollection<District> Districts { get; set; }
         public ICollection<Address> Addresses { get; set; }
     }

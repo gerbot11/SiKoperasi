@@ -1,6 +1,6 @@
 ﻿namespace SiKoperasi.AppService.Dto.Province
 {
-    public class ProvinceCreateDto
+    public record ProvinceCreateDto
     {
         public string Name { get; set; }
         public string Code { get; set; }

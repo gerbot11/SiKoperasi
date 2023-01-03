@@ -10,21 +10,19 @@ namespace SiKoperasi.Web.Controllers
         private const string BASE_LOAN_FOLDER_NAME = "LOAN";
 
         private readonly IWebHostEnvironment env;
-        private readonly IFileUploadExtService fileUploadExtService;
-        public FileUploadController(ILogger<FileUploadController> logger, IWebHostEnvironment env, IFileUploadExtService fileUploadExtService) : base(logger)
+
+        public FileUploadController(ILogger<FileUploadController> logger, IWebHostEnvironment env) : base(logger)
         {
             this.env = env;
-            this.fileUploadExtService = fileUploadExtService;
         }
 
         [HttpPost("[action]")]
         public async Task<FileUploadDto> UploadFile(IFormFile file, string folderId, string parentFolder)
         {
-            var fileUploaded = await fileUploadExtService.GoogleDriveUpload(BASE_LOAN_FOLDER_ID, folderId, file);
             FileUploadDto dto = new()
             {
                 FileName = file.FileName,
-                FullPath = fileUploaded,
+                FullPath = "Not Available",
                 Status  = 200
             };
 

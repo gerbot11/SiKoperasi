@@ -17,7 +17,7 @@ namespace SiKoperasi.Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUnpaymentLoan([FromQuery] QueryParamDto queryParam)
+        public async Task<IActionResult> GetLoanToBePaid([FromQuery] QueryParamDto queryParam)
         {
             LoggingPayload(queryParam);
             var data = await loanPaymentService.GetPagingLoanToBePaidAsync(queryParam);
@@ -33,7 +33,7 @@ namespace SiKoperasi.Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> SavingDeposit(SavingTransactionCreateDto dto)
+        public async Task<IActionResult> SavingTransaction(SavingTransactionCreateDto dto)
         {
             LoggingPayload(dto);
             var data = await savingTransactionService.CreateSavingTransactionAsync(dto);

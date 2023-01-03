@@ -8,6 +8,7 @@ using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Loans;
 using SiKoperasi.DataAccess.Models.Payments;
+using static SiKoperasi.AppService.Util.Constant;
 
 namespace SiKoperasi.AppService.Services.Loans
 {
@@ -28,7 +29,7 @@ namespace SiKoperasi.AppService.Services.Loans
                 throw new Exception("Loan Data is Not Found");
 
             InstalmentSchedule? instalment = dbContext.InstalmentSchedules
-                .Where(a => a.PayDate == null || a.PayAmount < a.InstAmount && a.LoanId == loan.Id && a.InstDate >= DateTime.Now.Date)
+                .Where(a => a.PayDate == null || a.PayAmount < a.InstAmount && a.LoanId == loan.Id)
                 .OrderBy(a => a.SeqNo)
                 .FirstOrDefault();
 
@@ -45,8 +46,20 @@ namespace SiKoperasi.AppService.Services.Loans
 
             PayHistH payHist = await CreateLoanPayHistory(loanPayment);
 
-            loan.CurrentDueNum = instalment.SeqNo + 1;
-            loan.NextDueNum = loan.CurrentDueNum + 1;
+            InstalmentSchedule? nextInst = dbContext.InstalmentSchedules.Where(a => a.LoanId == loan.Id && a.SeqNo == loan.NextDueNum).FirstOrDefault();
+            if (nextInst is not null)
+            {
+                loan.CurrentDueNum = nextInst.SeqNo;
+                loan.NextDueNum = nextInst.SeqNo + 1;
+                loan.NextDueDate = nextInst.InstDate;
+            }
+            else //kalau lunas
+            {
+                loan.Status = LOAN_STATUS_RELEASE_DOC;
+                loan.CurrentDueNum = 9999;
+                loan.NextDueNum = 9999;
+                loan.NextDueDate = new DateTime(9999, 1, 1);
+            }
 
             dbContext.Add(loanPayment);
             dbContext.Update(instalment);
@@ -61,15 +74,15 @@ namespace SiKoperasi.AppService.Services.Loans
         {
             var query = from a in dbContext.Loans
                         join b in dbContext.Members on a.MemberId equals b.Id
-                        where a.Status == Loan.LOAN_STATUS_LIVE
-                        orderby b.Name ascending
+                        where a.Status == LOAN_STATUS_LIVE
                         select new LoanToBePaidDto
                         {
                             LoanId = a.Id,
                             MemberName = b.Name,
                             LoanNo = a.LoanNo,
+                            OverDueDays = a.NextDueDate < DateTime.Now.Date ? (DateTime.Now.Date - a.NextDueDate).Value.Days : 0,
                             InstSchdl = dbContext.InstalmentSchedules
-                                .Where(x => x.PayDate == null || x.PayAmount < x.InstAmount && x.InstDate >= DateTime.Now.Date)
+                                .Where(x => x.PayDate == null || x.PayAmount < x.InstAmount)
                                 .OrderBy(a => a.SeqNo)
                                 .Select(x => new InstSchdlMinimalDto
                                 {
@@ -78,9 +91,14 @@ namespace SiKoperasi.AppService.Services.Loans
                                     InterestAmount = x.InterestAmount,
                                     PrincipalAmount = x.PrincipalAmount,
                                     SeqNo = x.SeqNo,
-                                    LoanId = x.LoanId
+                                    LoanId = x.LoanId,
+                                    OsInterestAmount = x.OsInterestAmount,
+                                    OsPrincipalAmount = x.OsPrincipalAmount
                                 }).Where(c => c.LoanId == a.Id).FirstOrDefault()
                         };
+
+            queryParam.OrderBy ??= nameof(LoanToBePaidDto.MemberName);
+            queryParam.OrderBehavior ??= Core.Enums.OrderBehaviour.Asc;
 
             return await PagingModel<LoanToBePaidDto>.CreateAsync(query, queryParam);
         }

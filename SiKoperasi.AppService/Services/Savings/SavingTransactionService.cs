@@ -8,6 +8,7 @@ using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.DataAccess.Models.Payments;
 using SiKoperasi.DataAccess.Models.Savings;
+using static SiKoperasi.AppService.Util.Constant;
 
 namespace SiKoperasi.AppService.Services.Savings
 {
@@ -24,6 +25,12 @@ namespace SiKoperasi.AppService.Services.Savings
         public async Task<PagingModel<SavingTransactionDto>> GetPagingModelAsync(QueryParamDto queryParam, string savingId)
         {
             var query = GetAppDbSet().Where(a => a.SavingId == savingId);
+            if (string.IsNullOrEmpty(queryParam.OrderBy))
+            {
+                queryParam.OrderBy = nameof(SavingTransaction.TrxDate);
+                queryParam.OrderBehavior = Core.Enums.OrderBehaviour.Desc;
+            }
+
             return await GetPagingDataDtoAsync(queryParam, query);
         }
 
@@ -33,6 +40,7 @@ namespace SiKoperasi.AppService.Services.Savings
             if (saving is null)
                 throw new Exception("Saving Data Is Not Exist");
 
+            await SavingTrxValidation(payload, saving);
             SavingTransaction savingTransaction = new()
             {
                 Amount = payload.Amount,
@@ -41,17 +49,17 @@ namespace SiKoperasi.AppService.Services.Savings
                 TrxDate = DateTime.Now,
                 TrxType = payload.TrxType,
                 TrxMethod = payload.TrxMethod,
-                TrxNo = masterSequenceService.GenerateNo(SavingTransaction.SAVING_TRX_CODE)
+                TrxNo = masterSequenceService.GenerateNo(SAVING_TRX_SEQ_CODE)
             };
 
             saving.SavingTransactions.Add(savingTransaction);
-            saving.TotalAmount += payload.Amount;
+            saving.TotalAmount = payload.TrxType == 'C' ? saving.TotalAmount + payload.Amount : saving.TotalAmount - payload.Amount;
 
             PayHistH payHist = await CreateSavingPayHistory(savingTransaction);
 
             dbContext.Savings.Update(saving);
             await dbContext.SaveChangesAsync();
-            await cashBankService.CreateCashBankTrxAsync(payHist, string.Empty);
+            await cashBankService.CreateCashBankTrxAsync(payHist, payload.CashBankAccountId);
 
             return mapper.Map<SavingTransactionDto>(savingTransaction);
         }
@@ -61,7 +69,7 @@ namespace SiKoperasi.AppService.Services.Savings
             PayHistH ph = new()
             {
                 Amount = savingTransaction.Amount,
-                TrxCode = SavingTransaction.SAVING_TRX_CODE,
+                TrxCode = SAVING_TRX_SEQ_CODE,
                 TrxDate = DateTime.Now.Date,
                 ValueDate = savingTransaction.TrxValueDate,
                 TrxNo = savingTransaction.TrxNo,
@@ -70,7 +78,7 @@ namespace SiKoperasi.AppService.Services.Savings
 
             PayHistD pd = new()
             {
-                Descr = "Saving Deposit",
+                Descr = savingTransaction.TrxType == 'C' ? "Saving Deposit" : "Saving Withdrawal",
                 InAmount = savingTransaction.TrxType == 'C' ? savingTransaction.Amount : 0,
                 OutAmount = savingTransaction.TrxType == 'D' ? savingTransaction.Amount : 0,
                 PayHistSeqNo = 1
@@ -79,6 +87,22 @@ namespace SiKoperasi.AppService.Services.Savings
             ph.PayHistDs.Add(pd);
             await dbContext.AddAsync(ph);
             return ph;
+        }
+
+        private async Task SavingTrxValidation(SavingTransactionCreateDto payload, Saving saving)
+        {
+            if (payload.TrxType != 'C' || payload.TrxType != 'D')
+                throw new Exception($"Invalid TrxType ({payload.TrxType}). Should Be 'C' or 'D'");
+
+            RefSavingType savingType = await dbContext.RefSavingTypes.SingleAsync(a => a.Id == saving.RefSavingTypeId);
+            if (!savingType.IsWithdrawal && payload.TrxType == 'D')
+                throw new Exception($"Cannot Withdraw From this type of Saving ({savingType.SavingName})");
+
+            if (payload.TrxType == 'D' && saving.TotalAmount < payload.Amount)
+                throw new Exception($"Insufficient Saving Balance. Your Balance: {saving.TotalAmount}");
+
+            if (payload.Amount < savingType.MinimalAmountDeposit && payload.TrxType == 'C')
+                throw new Exception($"{savingType.SavingName} minimal deposit({savingType.MinimalAmountDeposit}) is lower than Amount Receive ({payload.Amount})");
         }
 
         protected override DbSet<SavingTransaction> GetAppDbSet()

@@ -75,6 +75,11 @@ namespace SiKoperasi.AppService.Services.Members
         {
             return;
         }
+
+        protected override JobDto MappingToResultCrud(Job model)
+        {
+            return base.MappingToResult(model);
+        }
         #endregion
     }
 }

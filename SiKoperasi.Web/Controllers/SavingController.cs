@@ -34,5 +34,12 @@ namespace SiKoperasi.Web.Controllers
             var data = await savingTransactionService.GetPagingModelAsync(queryParam, savingid);
             return Ok(data);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSavingType([FromQuery] QueryParamDto queryParam)
+        {
+            var data = await savingService.GetPagingSavingTypeAsync(queryParam);
+            return Ok(data);
+        }
     }
 }

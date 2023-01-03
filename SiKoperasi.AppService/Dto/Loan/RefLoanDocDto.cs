@@ -1,13 +1,23 @@
 ﻿namespace SiKoperasi.AppService.Dto.Loan
 {
-    public class RefLoanDocDto
+    public record RefLoanDocDto
     {
-        public string Id { get; set; }
-        public string DocumentName { get; set; }
-        public string FileType { get; set; }
-        public string AcceptedFileExt { get; set; }
-        public int MaxFileSize { get; set; }
-        public bool IsMandatory { get; set; }
-        public bool IsActive { get; set; }
+        public string Id { get; init; } = null!;
+        public string DocumentName { get; init; } = null!;
+        public string FileType { get; init; } = null!;
+        public string AcceptedFileExt { get; init; } = null!;
+        public int MaxFileSize { get; init; }
+        public bool IsMandatory { get; init; }
+        public bool IsActive { get; init; }
     }
+
+    public record RefLoanDocCreateDto
+    (
+        string DocumentName ,
+        string FileType,
+        string AcceptedFileExt,
+        int MaxFileSize,
+        bool IsMandatory,
+        bool IsActive
+    );
 }
