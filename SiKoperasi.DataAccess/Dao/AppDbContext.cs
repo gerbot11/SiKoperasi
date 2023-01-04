@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using SiKoperasi.Auth.Services;
 using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Models.Commons;
 using SiKoperasi.DataAccess.Models.Loans;
@@ -14,8 +15,10 @@ namespace SiKoperasi.DataAccess.Dao
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        private readonly UserResolverService commonService;
+        public AppDbContext(DbContextOptions<AppDbContext> options, UserResolverService commonService) : base(options)
         {
+            this.commonService = commonService;
         }
 
         //Master Data
@@ -96,20 +99,22 @@ namespace SiKoperasi.DataAccess.Dao
 
         private void Audit()
         {
+            var currentUser = commonService.GetCurrentUser();
+            string userName = string.IsNullOrEmpty(currentUser.Id) ? "[No User]" : currentUser.Id;
             IEnumerable<EntityEntry> entityEntry = ChangeTracker.Entries().Where(a => a.State == EntityState.Added || a.State == EntityState.Modified);
             foreach (EntityEntry item in entityEntry)
             {
                 BaseModel baseModel = (BaseModel)item.Entity;
                 if (item.State == EntityState.Added)
                 {
-                    baseModel.UsrCrt = "Test Audit Crt";
+                    baseModel.UsrCrt =userName;
                     baseModel.DtmCrt = DateTime.Now;
-                    baseModel.UsrUpd = "Test Audit Crt";
+                    baseModel.UsrUpd =userName;
                     baseModel.DtmUpd = DateTime.Now;
                 }
                 else if(item.State == EntityState.Modified)
                 {
-                    baseModel.UsrUpd = "Test Audit Upd";
+                    baseModel.UsrUpd = userName;
                     baseModel.DtmUpd = DateTime.Now;
                 }
             }

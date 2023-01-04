@@ -9,10 +9,10 @@ namespace SiKoperasi.Auth.Models
             MenuPermissions = new HashSet<MenuPermission>();
         }
 
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Url { get; set; }
-        public string IconUrl { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string Url { get; set; } = null!;
+        public string? IconUrl { get; set; }
 
         public ICollection<MenuPermission> MenuPermissions { get; set; }
     }

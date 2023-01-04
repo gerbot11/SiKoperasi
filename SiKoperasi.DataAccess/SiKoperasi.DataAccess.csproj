@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SiKoperasi.Auth\SiKoperasi.Auth.csproj" />
     <ProjectReference Include="..\SiKoperasi.Core\SiKoperasi.Core.csproj" />
   </ItemGroup>
 

@@ -1,34 +1,44 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SiKoperasi.AppService.Contract;
+using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dto;
+using SiKoperasi.Auth.Services;
 
 namespace SiKoperasi.Web.Controllers
 {
     public class AuthController : BaseController<AuthController>
     {
-        private readonly IJwtTokenGeneratorService jwtTokenGeneratorService;
         private readonly ILoginService loginService;
-
-        public AuthController(ILogger<AuthController> logger, IJwtTokenGeneratorService jwtTokenGeneratorService, ILoginService loginService) : base(logger)
+        private readonly IRegisterService registerService;
+        private readonly UserResolverService commonService;
+        public AuthController(ILogger<AuthController> logger, ILoginService loginService, IRegisterService registerService, UserResolverService commonService) : base(logger)
         {
-            this.jwtTokenGeneratorService = jwtTokenGeneratorService;
+            this.registerService = registerService;
             this.loginService = loginService;
+            this.commonService = commonService;
         }
 
+        [AllowAnonymous]
         [HttpPost("[action]")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var result = jwtTokenGeneratorService.GenerateToken(Guid.NewGuid().ToString(), dto.Username);
-            string pass = loginService.EncryptPassword(dto.Password);
-            bool isValid = loginService.PasswordVerification("$2a$12$Ts8gzsP1dSheOHMYLKqe..PVgw7AyKf.17LgnBZIPkJ98bVJDYo/.", dto.Password);
-            return Ok(pass);
+            var data = await loginService.LoginProcess(dto);
+            return Ok(data);
         }
 
+        [AllowAnonymous]
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            return Ok();
+            var data = await registerService.RegisterAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TestUserContext()
+        {
+            var data = commonService.GetCurrentUser();
+            return Ok(data);
         }
     }
 }

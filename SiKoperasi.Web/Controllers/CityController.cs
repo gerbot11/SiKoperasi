@@ -9,11 +9,9 @@ namespace SiKoperasi.Web.Controllers
     public class CityController : BaseController<CityController>
     {
         private readonly ICityService cityService;
-        private readonly IProvinceService provinceService;
-        public CityController(ILogger<CityController> logger, ICityService cityService, IProvinceService provinceService) : base(logger)
+        public CityController(ILogger<CityController> logger, ICityService cityService) : base(logger)
         {
             this.cityService = cityService;
-            this.provinceService = provinceService;
         }
 
         [HttpGet("{id}")]
