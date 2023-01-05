@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SiKoperasi.AppService.Contract;
-using SiKoperasi.AppService.Dto.City;
 using SiKoperasi.AppService.Dto.Common;
 
 namespace SiKoperasi.Web.Controllers

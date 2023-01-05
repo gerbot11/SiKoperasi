@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Services.Approval;
 using SiKoperasi.AppService.Services.CashBanks;
 using SiKoperasi.AppService.Services.Common;
 using SiKoperasi.AppService.Services.Loans;
@@ -22,6 +23,7 @@ using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.ExternalService.Contract;
 using SiKoperasi.ExternalService.Services;
 using SiKoperasi.ExternalService.Utilities;
+using SiKoperasi.Web.FilterAttribute;
 using System.Text;
 
 namespace SiKoperasi.Web.Common
@@ -73,6 +75,10 @@ namespace SiKoperasi.Web.Common
 
             service.AddScoped<IShuService, ShuService>();
             service.AddScoped<IShuTrxService, ShuTrxService>();
+
+            service.AddScoped<IApprovalService, ApprovalService>();
+
+            service.AddScoped<PermissionFilterAttribute>();
         }
 
         private static void AddServiceTransient(IServiceCollection service)

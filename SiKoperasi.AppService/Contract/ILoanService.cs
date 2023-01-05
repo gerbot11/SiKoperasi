@@ -14,5 +14,7 @@ namespace SiKoperasi.AppService.Contract
         Task<IEnumerable<LoanDocumentViewDto>> GetLoanDocumentAsync(string loanid);
         Task<PagingModel<LoanDto>> GetLoanPagingAsync(QueryParamDto queryParam);
         Task<PagingModel<LoanSchemeDto>> GetLoanSchemeListAsync(QueryParamDto queryParam);
+        Task SubmitFinalLoanAsync(string id, string currUser);
+        Task UpdateLoanAfterApproveAsync(string loanNo, string apvStat);
     }
 }

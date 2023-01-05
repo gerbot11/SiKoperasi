@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dto;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class RoleController : BaseController<RoleController>
     {
         private readonly IRoleService roleService;

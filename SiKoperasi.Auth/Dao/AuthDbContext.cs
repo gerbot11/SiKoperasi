@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Models;
 using SiKoperasi.Auth.Services;
 using SiKoperasi.Core.Data;
@@ -45,8 +44,8 @@ namespace SiKoperasi.Auth.Dao
 
         private void Audit()
         {
-            Commons.UserIdentity currentUser = commonService.GetCurrentUser();
-            string userName = string.IsNullOrEmpty(currentUser.Id) ? "[No User]" : currentUser.Id;
+            string? currentUser = commonService.GetCurrentUserId();
+            string userName = string.IsNullOrEmpty(currentUser) ? "[No User]" : currentUser;
             IEnumerable<EntityEntry> entityEntry = ChangeTracker.Entries().Where(a => a.State == EntityState.Added || a.State == EntityState.Modified);
             foreach (EntityEntry item in entityEntry)
             {

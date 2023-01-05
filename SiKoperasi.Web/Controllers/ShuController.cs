@@ -2,9 +2,11 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Shu;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class ShuController : BaseController<ShuController>
     {
         private readonly IShuService shuService;

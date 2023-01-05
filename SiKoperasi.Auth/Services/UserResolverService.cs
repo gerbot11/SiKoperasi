@@ -60,5 +60,10 @@ namespace SiKoperasi.Auth.Services
 
             return userIdentity;
         }
+
+        public string? GetCurrentUserId()
+        {
+            return context.HttpContext.User.Claims.Where(a => a.Type == ClaimTypes.NameIdentifier).Select(a => a.Value).FirstOrDefault();
+        }
     }
 }

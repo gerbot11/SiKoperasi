@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using SiKoperasi.Auth.Commons;
 using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dao;
 using SiKoperasi.Auth.Dto;
@@ -26,26 +25,26 @@ namespace SiKoperasi.Auth.Services
 
         public async Task<bool> IsUserHasPermission(HttpContext context)
         {
-            string[] reqPathArr = context.Request.Path.Value.Split('/').ToArray();
-            string reqPath = $"/{reqPathArr[1]}/{reqPathArr[2]}";
-            string? claimContext = context.User.Claims.Where(a => a.Type == ClaimTypes.NameIdentifier).Select(a => a.Value).FirstOrDefault();
-            UserIdentity userIdentity = new();
-            //foreach (var item in claimContext)
-            //{
-            //    if (item.Type == ClaimTypes.Role)
-            //        userIdentity.Roles.Add(item.Value);
-            //    else
-            //        userIdentity.Id = item.Value;
-            //}
+            if (context.Request.Method != HttpMethod.Get.Method)
+            {
+                string? claimContext = context.User.Claims.Where(a => a.Type == ClaimTypes.NameIdentifier).Select(a => a.Value).FirstOrDefault();
+                if (claimContext is null)
+                    return true;
 
-            bool queryCheck = await (from a in dbContext.UserRoles
-                                    join b in dbContext.RolePermissions on a.RoleId equals b.RoleId
-                                    join c in dbContext.MenuPermissions on b.PermissionId equals c.PermissionId
-                                    join d in dbContext.Menus on c.MenuId equals d.Id
-                                    where a.UserId == claimContext && d.Url.Contains(reqPath)
-                                    select a).AnyAsync();
+                string[] reqPathArr = context.Request.Path.Value.Split('/').ToArray();
+                string reqPath = $"/{reqPathArr[1]}/{reqPathArr[2]}";
 
-            return queryCheck;
+                bool queryCheck = await (from a in dbContext.UserRoles
+                                         join b in dbContext.RolePermissions on a.RoleId equals b.RoleId
+                                         join c in dbContext.MenuPermissions on b.PermissionId equals c.PermissionId
+                                         join d in dbContext.Menus on c.MenuId equals d.Id
+                                         where a.UserId == claimContext && d.Url.Contains(reqPath)
+                                         select a).AnyAsync();
+
+                return queryCheck;
+            }
+
+            return true;
         }
 
         protected override Role CreateNewModel(RoleCreateDto payload)

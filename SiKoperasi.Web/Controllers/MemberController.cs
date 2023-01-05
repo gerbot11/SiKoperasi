@@ -2,15 +2,17 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Member;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class MemberController : BaseController<MemberController>
     {
         private readonly IMemberService memberService;
         private readonly IJobService jobService;
         private readonly IAddressService addressService;
-        
+
         public MemberController(ILogger<MemberController> logger, IMemberService memberService, IJobService jobService, IAddressService addressService) : base(logger)
         {
             this.memberService = memberService;

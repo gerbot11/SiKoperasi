@@ -17,9 +17,8 @@ namespace SiKoperasi.Web.Middleware
         {
             bool isPermited = await roleService.IsUserHasPermission(context);
             if (!isPermited)
-            {
                 await HandleResponse(context);
-            }else
+            else
                 await next(context);
         }
 

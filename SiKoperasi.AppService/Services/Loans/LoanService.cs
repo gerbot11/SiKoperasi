@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SiKoperasi.AppService.Contract;
+using SiKoperasi.AppService.Dto.Approval;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
 using SiKoperasi.AppService.Dto.Member;
@@ -20,15 +21,17 @@ namespace SiKoperasi.AppService.Services.Loans
         private readonly IInstalmentService instalmentService;
         private readonly IGoogleDriveService googleDriveService;
         private readonly IRefService refService;
+        private readonly IApprovalService approvalService;
 
         private const string LOAN_BASE_FOLDER = "LOAN";
-        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService, IGoogleDriveService googleDriveService, IRefService refService) 
+        public LoanService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, IInstalmentService instalmentService, IGoogleDriveService googleDriveService, IRefService refService, IApprovalService approvalService) 
             : base(dbContext, mapper)
         {
             this.masterSequenceService = masterSequenceService;
             this.instalmentService = instalmentService;
             this.refService = refService;
             this.googleDriveService = googleDriveService;
+            this.approvalService = approvalService;
         }
 
         public async Task<LoanDto> GetLoanAsync(string id)
@@ -44,6 +47,46 @@ namespace SiKoperasi.AppService.Services.Loans
         public async Task<LoanDto> CreateLoanAsync(LoanCreateDto payload)
         {
             return await BaseCreateAsync(payload);
+        }
+
+        public async Task SubmitFinalLoanAsync(string id, string currUser)
+        {
+            Loan loan = await BaseGetModelByIdAsync(id);
+            List<string> loanDocMandatoryId = dbContext.RefLoanDocuments.Where(a => a.IsActive && a.IsMandatory).Select(a => a.Id).ToList();
+            if (!await dbContext.LoanDocuments.AnyAsync(a => a.LoanId == id && loanDocMandatoryId.Contains(a.RefLoanDocumentId)))
+                throw new Exception("Please Complete Mandatory Loan Document");
+
+            string schemecode = dbContext.LoanSchemes.Where(a => a.Id == loan.LoanSchemeId).Select(a => a.ApprovalSchemeCode).Single();
+            loan.Status = LOAN_STATUS_REQ;
+            dbContext.Loans.Update(loan);
+            //await dbContext.SaveChangesAsync();
+
+            ApprovalReqDto approvalReq = new(schemecode, loan.LoanNo, null, currUser);
+            await approvalService.CreateNewApvRequestAsync(approvalReq);
+        }
+
+        public async Task UpdateLoanAfterApproveAsync(string loanNo, string apvStat)
+        {
+            Loan? loan = await dbContext.Loans.FirstOrDefaultAsync(a => a.LoanNo == loanNo);
+            if (loan is null)
+                throw new Exception("Loan Data Not Found");
+
+            if (apvStat == APV_STAT_DECLINE)
+            {
+                loan.Status = LOAN_STATUS_DECLINE;
+            }
+            else
+            {
+                var nextInstDate = dbContext.InstalmentSchedules.First(a => a.LoanId == loan.Id).InstDate;
+                loan.Status = LOAN_STATUS_LIVE;
+                loan.GoLiveDate = DateTime.Now.Date;
+                loan.CurrentDueNum = 1;
+                loan.NextDueNum = 2;
+                loan.NextDueDate = nextInstDate;
+            }
+
+            dbContext.Loans.Update(loan);
+            await dbContext.SaveChangesAsync();
         }
 
         #region Loan Document
@@ -177,7 +220,7 @@ namespace SiKoperasi.AppService.Services.Loans
             IQueryable<LoanDto> query = from a in dbContext.Loans
                                         join b in dbContext.Members on a.MemberId equals b.Id
                                         join d in dbContext.LoanSchemes on a.LoanSchemeId equals d.Id
-                                        where a.Status == LOAN_STATUS_NEW || a.Status == LOAN_STATUS_RETURN
+                                        where a.Status == LOAN_STATUS_NEW || a.Status == LOAN_STATUS_DECLINE
                                         select new LoanDto
                                         {
                                             Id = a.Id,

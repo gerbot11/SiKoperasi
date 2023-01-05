@@ -2,18 +2,22 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
+using SiKoperasi.Auth.Services;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class LoanController : BaseController<LoanController>
     {
         private readonly ILoanService loanService;
         private readonly IInstalmentService instalmentService;
-        
-        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService) : base(logger)
+        private readonly UserResolverService userResolverService;
+        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, UserResolverService userResolverService) : base(logger)
         {
             this.loanService = loanService;
             this.instalmentService = instalmentService;
+            this.userResolverService = userResolverService;
         }
 
         [HttpPost("[action]")]
@@ -22,6 +26,17 @@ namespace SiKoperasi.Web.Controllers
             LoggingPayload(dto);
             var data = await loanService.CreateLoanAsync(dto);
             return Ok(data);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> SubmitLoan(string id)
+        {
+            var currUser = userResolverService.GetCurrentUser();
+            if (string.IsNullOrEmpty(currUser.Username))
+                return BadRequest("No Active User");
+
+            await loanService.SubmitFinalLoanAsync(id, currUser.Username);
+            return Ok();
         }
 
         [HttpGet]

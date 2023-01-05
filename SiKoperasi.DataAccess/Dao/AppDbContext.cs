@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using SiKoperasi.Auth.Services;
 using SiKoperasi.Core.Data;
+using SiKoperasi.DataAccess.Models.Approvals;
 using SiKoperasi.DataAccess.Models.Commons;
 using SiKoperasi.DataAccess.Models.Loans;
 using SiKoperasi.DataAccess.Models.MasterData;
@@ -64,7 +65,13 @@ namespace SiKoperasi.DataAccess.Dao
         public virtual DbSet<ShuAllocation> ShuAllocations { get; set; }
         public virtual DbSet<ShuAllocationTrx> ShuAllocationTrxes { get; set; }
         public virtual DbSet<ShuAllocationTrxDist> ShuAllocationTrxDists { get; set; }
-        public virtual DbSet<ShuAllocationMember> ShuAllocationLoans { get; set; }
+        public virtual DbSet<ShuAllocationMember> ShuAllocationMembers { get; set; }
+
+        //Apv
+        public virtual DbSet<ApvScheme> ApvSchemes { get; set; }
+        public virtual DbSet<ApvSchemeNode> ApvSchemeNodes { get; set; }
+        public virtual DbSet<ApvReq> ApvReqs { get; set; }
+        public virtual DbSet<ApvReqTask> ApvReqTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,17 +106,17 @@ namespace SiKoperasi.DataAccess.Dao
 
         private void Audit()
         {
-            var currentUser = commonService.GetCurrentUser();
-            string userName = string.IsNullOrEmpty(currentUser.Id) ? "[No User]" : currentUser.Id;
+            string? currentUser = commonService.GetCurrentUserId();
+            string userName = string.IsNullOrEmpty(currentUser) ? "[No User]" : currentUser;
             IEnumerable<EntityEntry> entityEntry = ChangeTracker.Entries().Where(a => a.State == EntityState.Added || a.State == EntityState.Modified);
             foreach (EntityEntry item in entityEntry)
             {
                 BaseModel baseModel = (BaseModel)item.Entity;
                 if (item.State == EntityState.Added)
                 {
-                    baseModel.UsrCrt =userName;
+                    baseModel.UsrCrt = userName;
                     baseModel.DtmCrt = DateTime.Now;
-                    baseModel.UsrUpd =userName;
+                    baseModel.UsrUpd = userName;
                     baseModel.DtmUpd = DateTime.Now;
                 }
                 else if(item.State == EntityState.Modified)

@@ -2,9 +2,11 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.CashBank;
 using SiKoperasi.AppService.Dto.Common;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class CashBankController : BaseController<CashBankController>
     {
         private readonly ICashBankService cashBankService;

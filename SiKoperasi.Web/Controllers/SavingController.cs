@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class SavingController : BaseController<SavingController>
     {
         private readonly ISavingService savingService;

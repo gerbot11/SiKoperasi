@@ -3,9 +3,11 @@ using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
 using SiKoperasi.AppService.Dto.Saving;
+using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
+    [ServiceFilter(typeof(PermissionFilterAttribute))]
     public class PaymentController : BaseController<PaymentController>
     {
         private readonly ILoanPaymentService loanPaymentService;

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SiKoperasi.DataAccess.Dao;
 
@@ -11,9 +12,11 @@ using SiKoperasi.DataAccess.Dao;
 namespace SiKoperasi.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230105064039_appMig2")]
+    partial class appMig2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,9 +44,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Property<DateTime>("DtmUpd")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("FinishDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -53,6 +53,9 @@ namespace SiKoperasi.DataAccess.Migrations
 
                     b.Property<DateTime>("RequestDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ResultNotes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TrxNo")
                         .IsRequired()
@@ -78,14 +81,7 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime?>("ApproveDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ApvReqId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ApvSchemeNodeId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -107,11 +103,8 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Property<bool>("IsFinal")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("ProcessDate")
+                    b.Property<DateTime>("ProcessDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ResultNotes")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
@@ -127,8 +120,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApvReqId");
-
-                    b.HasIndex("ApvSchemeNodeId");
 
                     b.ToTable("ApvReqTask");
                 });
@@ -577,10 +568,6 @@ namespace SiKoperasi.DataAccess.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ApprovalSchemeCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DtmCrt")
                         .HasColumnType("datetime2");
@@ -1637,15 +1624,7 @@ namespace SiKoperasi.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SiKoperasi.DataAccess.Models.Approvals.ApvSchemeNode", "ApvSchemeNode")
-                        .WithMany("ApvReqTasks")
-                        .HasForeignKey("ApvSchemeNodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ApvReq");
-
-                    b.Navigation("ApvSchemeNode");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Approvals.ApvSchemeNode", b =>
@@ -1928,11 +1907,6 @@ namespace SiKoperasi.DataAccess.Migrations
                     b.Navigation("ApvReqs");
 
                     b.Navigation("ApvSchemeNodes");
-                });
-
-            modelBuilder.Entity("SiKoperasi.DataAccess.Models.Approvals.ApvSchemeNode", b =>
-                {
-                    b.Navigation("ApvReqTasks");
                 });
 
             modelBuilder.Entity("SiKoperasi.DataAccess.Models.Loans.Loan", b =>

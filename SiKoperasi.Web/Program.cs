@@ -1,5 +1,4 @@
 using SiKoperasi.Auth.Contract;
-using SiKoperasi.Auth.Services;
 using SiKoperasi.Web.Common;
 using SiKoperasi.Web.Middleware;
 
@@ -18,8 +17,8 @@ builder.Services.AddControllers();
 var app = builder.Build();
 {
     // Configure the HTTP request pipeline.
-    using var scope = app.Services.CreateScope();
-    var roleSvc = scope.ServiceProvider.GetRequiredService<IRoleService>();
+    //using var scope = app.Services.CreateScope();
+    //var roleSvc = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
     if (app.Environment.IsDevelopment())
     {
@@ -35,7 +34,7 @@ var app = builder.Build();
     app.UseAuthentication();
     app.UseHttpsRedirection();
     app.UseAuthorization();
-    app.UseMiddleware<PermissionAuthenticationMiddleware>(roleSvc);
+    //app.UseMiddleware<PermissionAuthenticationMiddleware>(roleSvc);
     app.UseExceptionHandler("/error");
     app.MapControllers();
 
