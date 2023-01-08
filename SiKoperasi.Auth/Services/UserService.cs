@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dao;
 using SiKoperasi.Auth.Dto;
@@ -14,13 +15,14 @@ namespace SiKoperasi.Auth.Services
     public class UserService : BaseCrudService<User, UserCreateDto, UserEditDto, UserDto, AuthDbContext>, IUserService
     {
         private readonly IRegisterService registerService;
-        public UserService(AuthDbContext dbContext, IMapper mapper, IRegisterService registerService) : base(dbContext, mapper)
+        public UserService(AuthDbContext dbContext, IMapper mapper, IRegisterService registerService, ILogger<User> logger) : base(dbContext, mapper, logger)
         {
             this.registerService = registerService;
         }
 
         public async Task<UserDto> CreateUserAsync(UserCreateDto payload) => await BaseCreateAsync(payload);
         public async Task<UserDto> EditUserAsync(UserEditDto payload) => await BaseEditAsync(payload.Id, payload);
+        public async Task DeleteUserAsync(string id) => await BaseSafeDeleteAsync(id);
         public async Task<UserDto> GetUserByIdAsync(string id)
         {
             var userdto = await dbContext.Users.Where(a => a.Id == id)

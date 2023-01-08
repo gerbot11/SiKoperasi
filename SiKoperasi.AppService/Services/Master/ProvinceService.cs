@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Province;
@@ -12,7 +13,7 @@ namespace SiKoperasi.AppService.Services.Master
 {
     public class ProvinceService : BaseCrudService<Province, ProvinceCreateDto, ProvinceEditDto, ProvinceDto, AppDbContext>, IProvinceService
     {
-        public ProvinceService(AppDbContext context, IMapper mapper) : base(context, mapper)
+        public ProvinceService(AppDbContext context, IMapper mapper, ILogger<Province> logger) : base(context, mapper, logger)
         {
         }
 

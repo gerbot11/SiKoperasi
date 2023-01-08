@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
-using SiKoperasi.Auth.Commons;
+using SiKoperasi.Core.Common;
+using SiKoperasi.Core.Data;
 using System.Security.Claims;
 
 namespace SiKoperasi.Auth.Services
 {
-    public class UserResolverService
+    public class UserResolverService : IUserResolverService
     {
         private readonly IHttpContextAccessor context;
         public UserResolverService(IHttpContextAccessor context)

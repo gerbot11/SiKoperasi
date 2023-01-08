@@ -9,6 +9,6 @@
         public List<PermissionDto> Permissions { get; init; } = null!;
     }
 
-    public record RoleCreateDto(string Name, string Description, string Code);
-    public record RoleEditDto(string Id, string Name, string Description, string Code);
+    public record RoleCreateDto(string Name, string Description, string Code, List<string> PermissionIds);
+    public record RoleEditDto(string Id, string Name, string Description, string Code, List<string> PermissionIds);
 }

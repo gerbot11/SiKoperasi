@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.City;
 using SiKoperasi.AppService.Dto.District;
@@ -15,7 +16,7 @@ namespace SiKoperasi.AppService.Services.Members
     public class AddressService : BaseCrudService<Address, AddressCreateDto, AddressEditDto, AddressDto, AppDbContext>, IAddressService
     {
         //private readonly IMemberService memberService;
-        public AddressService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public AddressService(AppDbContext dbContext, IMapper mapper, ILogger<Address> logger) : base(dbContext, mapper, logger)
         {
             //this.memberService = memberService;
         }

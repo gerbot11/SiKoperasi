@@ -27,6 +27,7 @@
     <ProjectReference Include="..\SiKoperasi.Auth\SiKoperasi.Auth.csproj" />
     <ProjectReference Include="..\SiKoperasi.DataAccess\SiKoperasi.DataAccess.csproj" />
     <ProjectReference Include="..\SiKoperasi.ExternalService\SiKoperasi.ExternalService.csproj" />
+    <ProjectReference Include="..\SiKoperasi.Worker\SiKoperasi.Worker.csproj" />
   </ItemGroup>
 
 </Project>

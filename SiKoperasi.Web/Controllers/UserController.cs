@@ -34,5 +34,12 @@ namespace SiKoperasi.Web.Controllers
             var data = await userService.CreateUserAsync(dto);
             return Ok(data);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await userService.DeleteUserAsync(id);
+            return NoContent();
+        }
     }
 }

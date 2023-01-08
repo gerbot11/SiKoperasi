@@ -19,11 +19,14 @@ using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dao;
 using SiKoperasi.Auth.Models;
 using SiKoperasi.Auth.Services;
+using SiKoperasi.Core.Common;
 using SiKoperasi.DataAccess.Dao;
 using SiKoperasi.ExternalService.Contract;
 using SiKoperasi.ExternalService.Services;
 using SiKoperasi.ExternalService.Utilities;
 using SiKoperasi.Web.FilterAttribute;
+using SiKoperasi.Worker.Common;
+using SiKoperasi.Worker.Workers;
 using System.Text;
 
 namespace SiKoperasi.Web.Common
@@ -37,10 +40,11 @@ namespace SiKoperasi.Web.Common
             AddServiceTransient(service);
             AddServiceSingleton(service);
             AddAutoMapper(service);
+            AddWorker(service);
             AddConfigureItem(service, configuration);
             AddDbContext(service, configuration);
             AddAuth(service, configuration);
-
+            
             service.AddHttpContextAccessor();
         }
 
@@ -58,10 +62,12 @@ namespace SiKoperasi.Web.Common
 
             service.AddScoped<ISavingService, SavingService>();
             service.AddScoped<ISavingTransactionService, SavingTransactionService>();
+            service.AddScoped<IRefSavingService, RefSavingService>();
 
             service.AddScoped<ILoanService, LoanService>();
             service.AddScoped<IInstalmentService, InstalmentService>();
             service.AddScoped<ILoanPaymentService, LoanPaymentService>();
+            service.AddScoped<ILoanSchemeService, LoanSchemeService>();
 
             service.AddScoped<IRefService, RefService>();
 
@@ -84,7 +90,7 @@ namespace SiKoperasi.Web.Common
         private static void AddServiceTransient(IServiceCollection service)
         {
             service.AddTransient<IGoogleDriveService, GoogleDriveService>();
-            service.AddTransient<UserResolverService>();
+            service.AddTransient<IUserResolverService, UserResolverService>();
         }
 
         private static void AddServiceSingleton(IServiceCollection service)
@@ -97,6 +103,13 @@ namespace SiKoperasi.Web.Common
         {
             service.AddDbContext<AppDbContext>(op => op.UseSqlServer(configuration.GetConnectionString(DB_CONN_STRING)));
             service.AddDbContext<AuthDbContext>(op => op.UseSqlServer(configuration.GetConnectionString(DB_CONN_STRING)));
+        }
+
+        private static void AddWorker(IServiceCollection service)
+        {
+            service.AddTransient<WorkerSettingService>();
+            service.AddHostedService<OnDuePayrollPaymentWorker>();
+            service.AddHostedService<OnDueNotifyWorker>();
         }
 
         private static void AddAutoMapper(IServiceCollection service)

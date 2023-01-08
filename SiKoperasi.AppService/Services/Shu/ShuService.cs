@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Shu;
@@ -13,7 +14,7 @@ namespace SiKoperasi.AppService.Services.Shu
     public class ShuService : BaseCrudService<ShuAllocation, ShuCreateDto, ShuEditDto, ShuDto, AppDbContext>, IShuService
     {
         private readonly IMasterSequenceService masterSequenceService;
-        public ShuService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService) : base(dbContext, mapper)
+        public ShuService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, ILogger<ShuAllocation> logger) : base(dbContext, mapper, logger)
         {
             this.masterSequenceService = masterSequenceService;
         }

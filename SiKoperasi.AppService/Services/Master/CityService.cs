@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.City;
 using SiKoperasi.AppService.Dto.Common;
@@ -12,7 +13,7 @@ namespace SiKoperasi.AppService.Services.Master
 {
     public class CityService : BaseCrudService<City, CityCreateDto, CityEditDto, CityDto, AppDbContext>, ICityService
     {
-        public CityService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public CityService(AppDbContext dbContext, IMapper mapper, ILogger<City> logger) : base(dbContext, mapper, logger)
         {
         }
 

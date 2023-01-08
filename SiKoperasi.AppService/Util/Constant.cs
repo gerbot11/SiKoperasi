@@ -4,6 +4,12 @@
     {
         public const string REF_GURANTEE_TYPE_CODE = "GUARANTEETYPE";
         public const string REF_ID_TYPE_CODE = "IDTYPE";
+        public const string REF_WA_VERIFICATION_CODE = "WAVERIFCODE";
+
+        public const string REST_WA_CALLBACK = "sikopcallback";
+
+        public const char SAVING_CREDIT_CODE = 'C';
+        public const char SAVING_DEBIT_CODE = 'D';
 
         public const string GOOGLE_DRIVE_EMBEDED_PREFIX = "https://drive.google.com/file/d/{0}/preview";
 

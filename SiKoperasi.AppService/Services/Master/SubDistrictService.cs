@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.SubDistrict;
@@ -13,7 +13,7 @@ namespace SiKoperasi.AppService.Services.Master
 {
     public class SubDistrictService : BaseCrudService<SubDistrict, SubDistrictCreateDto, SubDistrictEditDto, SubDistrictDto, AppDbContext>, ISubDistrictService
     {
-        public SubDistrictService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public SubDistrictService(AppDbContext dbContext, IMapper mapper, ILogger<SubDistrict> logger) : base(dbContext, mapper, logger)
         {
         }
 

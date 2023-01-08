@@ -5,7 +5,7 @@ using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
 {
-    [ServiceFilter(typeof(PermissionFilterAttribute))]
+    //[ServiceFilter(typeof(PermissionFilterAttribute))]
     public class RoleController : BaseController<RoleController>
     {
         private readonly IRoleService roleService;
@@ -22,10 +22,32 @@ namespace SiKoperasi.Web.Controllers
             return Ok(data);
         }
 
+        [HttpPut]
+        public async Task<IActionResult> Edit(RoleEditDto dto)
+        {
+            LoggingPayload(dto);
+            var data = await roleService.EditRoleAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await roleService.DeleteRoleAsync(id);
+            return NoContent();
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetPaging([FromQuery] QueryParamDto queryParam)
         {
             var data = await roleService.GetPagingRoleAsync(queryParam);
+            return Ok(data);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(string id)
+        {
+            var data = await roleService.GetRoleByIdAsync(id);
             return Ok(data);
         }
     }

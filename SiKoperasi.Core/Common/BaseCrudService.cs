@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.Core.Data;
 using SiKoperasi.Core.Exceptions;
 using System.Reflection;
@@ -14,11 +15,13 @@ namespace SiKoperasi.Core.Common
     {
         protected readonly TDbContext dbContext;
         protected readonly IMapper mapper;
+        protected readonly ILogger logger;
 
-        public BaseCrudService(TDbContext dbContext, IMapper mapper)
+        public BaseCrudService(TDbContext dbContext, IMapper mapper, ILogger<TModel> logger)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         protected virtual async Task<TResult> BaseGetByIdAsync(string id, bool hasIncluded = false)

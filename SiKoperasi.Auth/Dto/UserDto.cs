@@ -1,6 +1,7 @@
 ﻿using SiKoperasi.Auth.Models;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using static SiKoperasi.Auth.Commons.Constant;
 
 namespace SiKoperasi.Auth.Dto
 {
@@ -19,6 +20,7 @@ namespace SiKoperasi.Auth.Dto
         public string Username { get; init; } = null!;
         public string FullName { get; init; } = null!;
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [RegularExpression(REGEX_PASSWORD_COMPLEXITY, ErrorMessage = "")]
         [DataType(DataType.Password)]
         public string Password { get; init; } = null!;
         [DataType(DataType.Password)]

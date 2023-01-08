@@ -6,6 +6,7 @@ namespace SiKoperasi.Auth.Contract
     public interface IUserService
     {
         Task<UserDto> CreateUserAsync(UserCreateDto payload);
+        Task DeleteUserAsync(string id);
         Task<UserDto> EditUserAsync(UserEditDto payload);
         Task<UserDto> GetUserByIdAsync(string id);
         Task<PagingModel<UserDto>> GetUserPagingAsync(QueryParamDto queryParam);

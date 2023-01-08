@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using SiKoperasi.Auth.Services;
+using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
 using SiKoperasi.DataAccess.Models.Approvals;
 using SiKoperasi.DataAccess.Models.Commons;
@@ -16,8 +16,8 @@ namespace SiKoperasi.DataAccess.Dao
 {
     public class AppDbContext : DbContext
     {
-        private readonly UserResolverService commonService;
-        public AppDbContext(DbContextOptions<AppDbContext> options, UserResolverService commonService) : base(options)
+        private readonly IUserResolverService commonService;
+        public AppDbContext(DbContextOptions<AppDbContext> options, IUserResolverService commonService) : base(options)
         {
             this.commonService = commonService;
         }
@@ -72,6 +72,9 @@ namespace SiKoperasi.DataAccess.Dao
         public virtual DbSet<ApvSchemeNode> ApvSchemeNodes { get; set; }
         public virtual DbSet<ApvReq> ApvReqs { get; set; }
         public virtual DbSet<ApvReqTask> ApvReqTasks { get; set; }
+
+        //Worker Setting
+        public virtual DbSet<WorkerSetting> WorkerSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

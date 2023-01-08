@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Member;
 using SiKoperasi.Core.Common;
@@ -10,7 +11,7 @@ namespace SiKoperasi.AppService.Services.Members
 {
     public class JobService : BaseCrudService<Job, JobCreateDto, JobEditDto, JobDto, AppDbContext>, IJobService
     {
-        public JobService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public JobService(AppDbContext dbContext, IMapper mapper, ILogger<Job> logger) : base(dbContext, mapper, logger)
         {
         }
 

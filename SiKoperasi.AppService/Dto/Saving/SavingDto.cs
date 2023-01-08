@@ -25,7 +25,7 @@
         decimal Amount,
         string TrxMethod,
         string CashBankAccountId,
-        char TrxType,
+        string TrxType,
         string? Notes
     );
 
@@ -41,7 +41,9 @@
         string? Notes
     );
 
-    public record RefSavingTypeDto {
+    public record RefSavingTypeDto 
+    {
+        public string Id { get; init; } = null!;
         public string SavingName { get; init; } = null!;
         public decimal MinimalAmountDeposit { get; init; }
         public decimal? CutAmount { get; init; }
@@ -50,4 +52,7 @@
         public decimal SavingRate { get; init; }
         public bool IsWithdrawal { get; init; }
     }
+
+    public record RefSavingTypeCreateDto(string SavingName, decimal MinimalAmountDeposit, decimal? CutAmount, bool IsMandatory, decimal SavingRate, bool IsWithdrawal);
+    public record RefSavingTypeEditDto(string Id, string SavingName, decimal MinimalAmountDeposit, decimal? CutAmount, bool IsMandatory, decimal SavingRate, bool IsWithdrawal);
 }

@@ -2,7 +2,7 @@
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Loan;
-using SiKoperasi.Auth.Services;
+using SiKoperasi.Core.Common;
 using SiKoperasi.Web.FilterAttribute;
 
 namespace SiKoperasi.Web.Controllers
@@ -12,12 +12,18 @@ namespace SiKoperasi.Web.Controllers
     {
         private readonly ILoanService loanService;
         private readonly IInstalmentService instalmentService;
-        private readonly UserResolverService userResolverService;
-        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, UserResolverService userResolverService) : base(logger)
+        private readonly IUserResolverService userResolverService;
+        private readonly ILoanSchemeService loanSchemeService;
+
+        private const string REST_DOCUMENT = "document";
+        private const string REST_SCHEME = "scheme";
+        private const string REST_GUARANTEE = "guarantee";
+        public LoanController(ILogger<LoanController> logger, ILoanService loanService, IInstalmentService instalmentService, IUserResolverService userResolverService, ILoanSchemeService loanSchemeService) : base(logger)
         {
             this.loanService = loanService;
             this.instalmentService = instalmentService;
             this.userResolverService = userResolverService;
+            this.loanSchemeService = loanSchemeService;
         }
 
         [HttpPost("[action]")]
@@ -25,6 +31,14 @@ namespace SiKoperasi.Web.Controllers
         {
             LoggingPayload(dto);
             var data = await loanService.CreateLoanAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> EditLoan(LoanEditDto dto)
+        {
+            LoggingPayload(dto);
+            var data = await loanService.EditLoanAsync(dto);
             return Ok(data);
         }
 
@@ -50,13 +64,6 @@ namespace SiKoperasi.Web.Controllers
         public async Task<IActionResult> GetLoan(string id)
         {
             var data = await loanService.GetLoanAsync(id);
-            return Ok(data);
-        }
-
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetListLoanSchemes([FromQuery] QueryParamDto queryParam)
-        {
-            var data = await loanService.GetLoanSchemeListAsync(queryParam);
             return Ok(data);
         }
 
@@ -88,20 +95,67 @@ namespace SiKoperasi.Web.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]/{loanid}")]
+        [HttpGet(REST_DOCUMENT + "/{loanid}")]
         public async Task<IActionResult> GetLoanDocument(string loanid)
         {
             var data = await loanService.GetLoanDocumentAsync(loanid);
             return Ok(data);
         }
 
+        [HttpPut(REST_DOCUMENT)]
+        public async Task<IActionResult> EditLoanDocument([FromForm] LoanDocumentEditDto dto)
+        {
+            LoggingPayload(dto);
+            await loanService.EditLoanDocumentAsync(dto);
+            return Ok();
+        }
+
         //Loan Guarantee
-        [HttpPost("[action]")]
+        [HttpPost(REST_GUARANTEE)]
         public async Task<IActionResult> CreateLoanGuarantee([FromForm] LoanGuaranteeCreateDto dto)
         {
             LoggingPayload(dto);
             await loanService.CreateLoanGuaranteAsync(dto);
             return Ok();
         }
+
+        #region Loan Scheme
+        [HttpPost(REST_SCHEME)]
+        public async Task<IActionResult> CreateLoanScheme(LoanSchemeCreateDto dto)
+        {
+            LoggingPayload(dto);
+            var data = await loanSchemeService.CreateLoanSchemeAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpPut(REST_SCHEME)]
+        public async Task<IActionResult> EditLoanScheme(LoanSchemeEditDto dto)
+        {
+            LoggingPayload(dto);
+            var data = await loanSchemeService.EditLoanSchemeAsync(dto);
+            return Ok(data);
+        }
+
+        [HttpDelete(REST_SCHEME + "/{id}")]
+        public async Task<IActionResult> DeleteLoanScheme(string id)
+        {
+            await loanSchemeService.DeleteLoanSchemeAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet(REST_SCHEME + "/{id}")]
+        public async Task<IActionResult> GetLoanScheme(string id)
+        {
+            var data = await loanSchemeService.GetLoanSchemeByIdAsync(id);
+            return Ok(data);
+        }
+
+        [HttpGet(REST_SCHEME)]
+        public async Task<IActionResult> GetListLoanSchemes([FromQuery] QueryParamDto queryParam)
+        {
+            var data = await loanSchemeService.GetLoanSchemeListAsync(queryParam);
+            return Ok(data);
+        }
+        #endregion
     }
 }

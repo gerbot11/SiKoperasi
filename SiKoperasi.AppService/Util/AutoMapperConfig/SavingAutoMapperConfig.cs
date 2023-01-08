@@ -9,8 +9,9 @@ namespace SiKoperasi.AppService.Util.AutoMapperConfig
         public SavingAutoMapperConfig()
         {
             CreateMap<SavingMinimalDto, Saving>().ReverseMap();
-
             CreateMap<SavingTransactionDto, SavingTransaction>().ReverseMap();
+            CreateMap<RefSavingTypeDto, RefSavingType>().ReverseMap();
+            CreateMap<RefSavingTypeCreateDto, RefSavingType>().ReverseMap();
         }
     }
 }

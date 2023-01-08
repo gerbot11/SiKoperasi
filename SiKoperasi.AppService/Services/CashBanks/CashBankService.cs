@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.CashBank;
 using SiKoperasi.AppService.Dto.Common;
@@ -12,7 +13,7 @@ namespace SiKoperasi.AppService.Services.CashBanks
 {
     public class CashBankService : BaseCrudService<CashBankAccount, CashBankAccCreateDto, CashBankAccDto, CashBankAccDto, AppDbContext>, ICashBankService
     {
-        public CashBankService(AppDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public CashBankService(AppDbContext dbContext, IMapper mapper, ILogger<CashBankAccount> logger) : base(dbContext, mapper, logger)
         {
         }
 

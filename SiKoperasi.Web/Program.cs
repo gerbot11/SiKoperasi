@@ -1,6 +1,4 @@
-using SiKoperasi.Auth.Contract;
 using SiKoperasi.Web.Common;
-using SiKoperasi.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

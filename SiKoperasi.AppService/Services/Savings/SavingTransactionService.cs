@@ -47,13 +47,13 @@ namespace SiKoperasi.AppService.Services.Savings
                 Notes = payload.Notes,
                 TrxValueDate = payload.TrxValueDate,
                 TrxDate = DateTime.Now,
-                TrxType = payload.TrxType,
+                TrxType = Convert.ToChar(payload.TrxType),
                 TrxMethod = payload.TrxMethod,
                 TrxNo = masterSequenceService.GenerateNo(SAVING_TRX_SEQ_CODE)
             };
 
             saving.SavingTransactions.Add(savingTransaction);
-            saving.TotalAmount = payload.TrxType == 'C' ? saving.TotalAmount + payload.Amount : saving.TotalAmount - payload.Amount;
+            saving.TotalAmount = payload.TrxType == SAVING_CREDIT_CODE.ToString() ? saving.TotalAmount + payload.Amount : saving.TotalAmount - payload.Amount;
 
             PayHistH payHist = await CreateSavingPayHistory(savingTransaction);
 
@@ -78,9 +78,9 @@ namespace SiKoperasi.AppService.Services.Savings
 
             PayHistD pd = new()
             {
-                Descr = savingTransaction.TrxType == 'C' ? "Saving Deposit" : "Saving Withdrawal",
-                InAmount = savingTransaction.TrxType == 'C' ? savingTransaction.Amount : 0,
-                OutAmount = savingTransaction.TrxType == 'D' ? savingTransaction.Amount : 0,
+                Descr = savingTransaction.TrxType == SAVING_CREDIT_CODE ? "Saving Deposit" : "Saving Withdrawal",
+                InAmount = savingTransaction.TrxType == SAVING_CREDIT_CODE ? savingTransaction.Amount : 0,
+                OutAmount = savingTransaction.TrxType == SAVING_DEBIT_CODE ? savingTransaction.Amount : 0,
                 PayHistSeqNo = 1
             };
 
@@ -91,17 +91,18 @@ namespace SiKoperasi.AppService.Services.Savings
 
         private async Task SavingTrxValidation(SavingTransactionCreateDto payload, Saving saving)
         {
-            if (payload.TrxType != 'C' || payload.TrxType != 'D')
+            string[] trxTypes = { SAVING_DEBIT_CODE.ToString(), SAVING_CREDIT_CODE.ToString() };
+            if (!trxTypes.Contains(payload.TrxType))
                 throw new Exception($"Invalid TrxType ({payload.TrxType}). Should Be 'C' or 'D'");
 
             RefSavingType savingType = await dbContext.RefSavingTypes.SingleAsync(a => a.Id == saving.RefSavingTypeId);
-            if (!savingType.IsWithdrawal && payload.TrxType == 'D')
+            if (!savingType.IsWithdrawal && payload.TrxType == SAVING_DEBIT_CODE.ToString())
                 throw new Exception($"Cannot Withdraw From this type of Saving ({savingType.SavingName})");
 
-            if (payload.TrxType == 'D' && saving.TotalAmount < payload.Amount)
+            if (payload.TrxType == SAVING_DEBIT_CODE.ToString() && saving.TotalAmount < payload.Amount)
                 throw new Exception($"Insufficient Saving Balance. Your Balance: {saving.TotalAmount}");
 
-            if (payload.Amount < savingType.MinimalAmountDeposit && payload.TrxType == 'C')
+            if (payload.Amount < savingType.MinimalAmountDeposit && payload.TrxType == SAVING_CREDIT_CODE.ToString())
                 throw new Exception($"{savingType.SavingName} minimal deposit({savingType.MinimalAmountDeposit}) is lower than Amount Receive ({payload.Amount})");
         }
 

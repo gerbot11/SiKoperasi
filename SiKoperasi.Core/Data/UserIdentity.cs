@@ -1,7 +1,6 @@
-﻿using SiKoperasi.Auth.Dto;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace SiKoperasi.Auth.Commons
+namespace SiKoperasi.Core.Data
 {
     public class UserIdentity : ClaimsPrincipal
     {
@@ -12,10 +11,5 @@ namespace SiKoperasi.Auth.Commons
         public string Phone { get; set; }
 
         public List<string> Roles { get; set; }
-
-        public bool HasPermission(string permission)
-        {
-            return true;
-        }
     }
 }

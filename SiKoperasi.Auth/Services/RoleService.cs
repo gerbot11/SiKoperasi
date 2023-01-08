@@ -1,27 +1,54 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.Auth.Contract;
 using SiKoperasi.Auth.Dao;
 using SiKoperasi.Auth.Dto;
 using SiKoperasi.Auth.Models;
 using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
+using System.Data;
 using System.Security.Claims;
 
 namespace SiKoperasi.Auth.Services
 {
     public class RoleService : BaseCrudService<Role, RoleCreateDto, RoleEditDto, RoleDto, AuthDbContext>, IRoleService
     {
-        public RoleService(AuthDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public RoleService(AuthDbContext dbContext, IMapper mapper, ILogger<Role> logger) : base(dbContext, mapper, logger)
         {
         }
 
         public async Task<RoleDto> CreateRoleAsync(RoleCreateDto payload) => await BaseCreateAsync(payload);
         public async Task<RoleDto> EditRoleAsync(RoleEditDto payload) => await BaseEditAsync(payload.Id, payload);
         public async Task<PagingModel<RoleDto>> GetPagingRoleAsync(QueryParamDto queryParam) => await BaseGetPagingDataDtoAsync(queryParam);
-        public async Task<RoleDto> GetRoleByIdAsync(string id) => await BaseGetByIdAsync(id);
         public async Task DeleteRoleAsync(string id) => await BaseDeleteAsync(id);
+        public async Task<RoleDto> GetRoleByIdAsync(string id)
+        {
+            Role? role = await BaseGetModelByIdAsync(id);
+
+            var permissions = await dbContext.RolePermissions
+                .Where(a => a.RoleId == role.Id)
+                .Include(a => a.Permission)
+                .Select(a => new PermissionDto
+                {
+                    Code = a.Permission.Code,
+                    Name = a.Permission.Name,
+                    Description = a.Permission.Description,
+                    Id = a.Permission.Id
+                }).ToListAsync();
+
+            RoleDto dto = new()
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Description = role.Description,
+                Code = role.Code,
+                Permissions = permissions
+            };
+
+            return dto;
+        }
 
         public async Task<bool> IsUserHasPermission(HttpContext context)
         {
@@ -49,7 +76,17 @@ namespace SiKoperasi.Auth.Services
 
         protected override Role CreateNewModel(RoleCreateDto payload)
         {
-            return mapper.Map<Role>(payload);
+            Role role = mapper.Map<Role>(payload);
+            foreach (string item in payload.PermissionIds)
+            {
+                RolePermission rp = new()
+                {
+                    Role = role,
+                    PermissionId = item
+                };
+                role.RolePermissions.Add(rp);
+            }
+            return role;
         }
 
         protected override DbSet<Role> GetAppDbSet()
@@ -72,6 +109,20 @@ namespace SiKoperasi.Auth.Services
             model.Name = payload.Name;
             model.Description = payload.Description;
             model.Code = payload.Code;
+            model.RolePermissions = dbContext.RolePermissions.Where(a => a.RoleId == model.Id).ToList();
+
+            foreach (var item in model.RolePermissions)
+                dbContext.RolePermissions.Remove(item);
+
+            foreach (var item in payload.PermissionIds)
+            {
+                RolePermission rp = new()
+                {
+                    Role = model,
+                    PermissionId = item
+                };
+                model.RolePermissions.Add(rp);
+            }
         }
 
         protected override IQueryable<Role> SetQueryable()

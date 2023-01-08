@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SiKoperasi.AppService.Contract;
 using SiKoperasi.AppService.Dto.Common;
 using SiKoperasi.AppService.Dto.Member;
@@ -15,8 +16,8 @@ namespace SiKoperasi.AppService.Services.Members
     {
         private readonly IMasterSequenceService masterSequenceService;
         private readonly ISavingService savingService;
-        public MemberService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, ISavingService savingService) 
-            : base(dbContext, mapper)
+        public MemberService(AppDbContext dbContext, IMapper mapper, IMasterSequenceService masterSequenceService, ISavingService savingService, ILogger<Member> logger) 
+            : base(dbContext, mapper, logger)
         {
             this.masterSequenceService = masterSequenceService;
             this.savingService = savingService;

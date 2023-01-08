@@ -12,6 +12,6 @@ namespace SiKoperasi.DataAccess.Models.Savings
         public decimal SavingRate { get; set; }
         public bool IsWithdrawal { get; set; }
 
-        public ICollection<Saving> Savings { get; set; }
+        public ICollection<Saving> Savings { get; set; } = null!;
     }
 }

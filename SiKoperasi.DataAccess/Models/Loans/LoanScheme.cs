@@ -11,5 +11,6 @@ namespace SiKoperasi.DataAccess.Models.Loans
         //public decimal LateChargeRate { get; set; }
         public bool IsUseGuarantee { get; set; }
         public string ApprovalSchemeCode { get; set; } = null!;
+        public bool IsActive { get; set; }
     }
 }

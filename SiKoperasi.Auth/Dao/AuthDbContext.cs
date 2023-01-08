@@ -3,14 +3,15 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using SiKoperasi.Auth.Models;
 using SiKoperasi.Auth.Services;
+using SiKoperasi.Core.Common;
 using SiKoperasi.Core.Data;
 
 namespace SiKoperasi.Auth.Dao
 {
     public class AuthDbContext : DbContext
     {
-        private readonly UserResolverService commonService;
-        public AuthDbContext(DbContextOptions<AuthDbContext> options, UserResolverService commonService) : base(options)
+        private readonly IUserResolverService commonService;
+        public AuthDbContext(DbContextOptions<AuthDbContext> options, IUserResolverService commonService) : base(options)
         {
             this.commonService = commonService;
         }
